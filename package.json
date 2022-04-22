@@ -1,7 +1,9 @@
 {
   "scripts": {
     "start-test-runner": "npx cypress open",
-    "run all test in cli": "npx cypress run"
+    "run all test in cli": "npx cypress run",
+    "cy:run:chrome": "cypress run --browser chrome",
+    "cy:run:firefox": "cypress run --browser firefox"
   },
   "devDependencies": {
     "cypress": "^9.5.4",

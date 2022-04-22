@@ -10,6 +10,36 @@
 //
 //
 // -- This is a parent command --
+Cypress.Commands.add('isProjectPropertiesDisabled', () => {
+    //let isDisabled = true;
+    try {
+    //check 3 others buttons mat,in/exterior are disabled
+    cy.get('a[data-test-id="material"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('a[data-test-id="interiors"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('a[data-test-id="exteriors"]').should('have.attr', 'aria-disabled', 'true')
+    cy.get('a[data-test-id="sharing"]').should('have.attr', 'aria-disabled', 'true')
+    
+    } catch (error) {
+        //!isDisabled
+    }
+//return isDisabled
+})
+
+Cypress.Commands.add('isProjectPropertiesEnabled', () => {
+   
+    try {
+    
+        //assert material, in/exteriors are disabled on newly added project
+        cy.get('a[data-test-id="material"]').should('not.have.attr', 'aria-disabled')
+        cy.get('a[data-test-id="interiors"]').should('not.have.attr', 'aria-disabled')
+        cy.get('a[data-test-id="exteriors"]').should('not.have.attr', 'aria-disabled')
+        cy.get('a[data-test-id="sharing"]').should('not.have.attr', 'aria-disabled')
+    } catch (error) {
+       
+    }
+})
+
+
 Cypress.Commands.add('logInCmd', (userName, password) => {
     cy.get('[data-test-id="userName"]').type(userName).should('have.value',userName)
     cy.get('[data-test-id="password"]').type(password)

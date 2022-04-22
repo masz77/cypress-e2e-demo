@@ -9,5 +9,7 @@
         "reportPageTitle": "My Test Suite",
         "embeddedScreenshots": true,
         "inlineAssets": true
-  }
+  },
+    "selectorPriority": ["data-test-id","id", "class", "attributes","data-testid"],
+    "experimentalStudio": true
 }

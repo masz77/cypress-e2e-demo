@@ -7,7 +7,7 @@ describe('project360 - project tab functionalities', () => {
   //   cy.url().should('eq',Cypress.config().baseUrl+'admin/dashboard')
   // })
   context('creates new project with details', () => {
-    it('enter add new mode', () => {
+    it('add new', () => {
       //log in and assert
       cy.visit(Cypress.config().baseUrl)
       cy.logInCmd('admin', 'admin').type('{enter}')
@@ -18,10 +18,7 @@ describe('project360 - project tab functionalities', () => {
       //click add new
       cy.get('a[data-test-id="addNewBtn"]').click()
       cy.url().should('contain', 'admin/project/new')
-      //check 3 others buttons mat,in/exterior are disabled
-      cy.get('div.MuiTabs-flexContainer > a').contains('Material').should('have.attr', 'aria-disabled', 'true')
-      cy.get('div.MuiTabs-flexContainer > a').contains('Interiors').should('have.attr', 'aria-disabled', 'true')
-      cy.get('div.MuiTabs-flexContainer > a').contains('Exterior').should('have.attr', 'aria-disabled', 'true')
+      cy.isProjectPropertiesDisabled()
     })
     it('creates new project with details', () => {
       //fill in required field
@@ -38,23 +35,49 @@ describe('project360 - project tab functionalities', () => {
       cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
       //assert material, in/exteriors are disabled on newly added project
-      cy.get('div.MuiTabs-flexContainer > a').contains('Material').should('not.have.attr', 'aria-disabled')
-      cy.get('div.MuiTabs-flexContainer > a').contains('Interiors').should('not.have.attr', 'aria-disabled')
-      cy.get('div.MuiTabs-flexContainer > a').contains('Exterior').should('not.have.attr', 'aria-disabled')
+      cy.get('a[data-test-id="material"]').should('not.have.attr', 'aria-disabled')
+      cy.get('a[data-test-id="interiors"]').should('not.have.attr', 'aria-disabled')
+      cy.get('a[data-test-id="exteriors"]').should('not.have.attr', 'aria-disabled')
+      cy.get('a[data-test-id="sharing"]').should('not.have.attr', 'aria-disabled')
 
     })
   })
 
-  context('modify projects material', () => {
-    it('enter modifying mode', () => {
-      //navigate to project
-      cy.get('a[href="/admin/project"]').click()
-      cy.url().should('contain', 'admin/project')
-      
+  context('modify projects properties', () => {
+    // beforeEach('go to project tab', () => {
+
+    // })
+    context('material', () => {
+      beforeEach('go to project -> modify the last project', () => {
+        //navigate to project
+        cy.get('a[href="/admin/project"]').click()
+        cy.url().should('contain', 'admin/project')
+        //click modify
+        cy.get('button[data-test-id="actMod"]').last().click()
+        cy.get('div > h5').contains('Project detail').should('be.visible')
+        cy.isProjectPropertiesEnabled()
+        cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
+      })
+      it('add new', () => {
+        cy.get('button').contains('Add new').click()
+        //get the master div contain 7 input tag
+        //loop thru each input tag and type in value
+      })
+      it('copy from other project', () => {
+
+      })
+      it('modify existing project', () => {
+
+      })
+      it('fill in data and save', () => {
+
+      })
     })
-    it('fill in data and save', () => {
+
+    context('interior', () => {
 
     })
+
   })
 
 
