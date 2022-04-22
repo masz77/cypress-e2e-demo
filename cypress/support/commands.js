@@ -13,47 +13,59 @@
 Cypress.Commands.add('isProjectPropertiesDisabled', () => {
     //let isDisabled = true;
     try {
-    //check 3 others buttons mat,in/exterior are disabled
-    cy.get('a[data-test-id="material"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('a[data-test-id="interiors"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('a[data-test-id="exteriors"]').should('have.attr', 'aria-disabled', 'true')
-    cy.get('a[data-test-id="sharing"]').should('have.attr', 'aria-disabled', 'true')
-    
+        //check 3 others buttons mat,in/exterior are disabled
+        cy.get('a[data-test-id="material"]').should('have.attr', 'aria-disabled', 'true')
+        cy.get('a[data-test-id="interiors"]').should('have.attr', 'aria-disabled', 'true')
+        cy.get('a[data-test-id="exteriors"]').should('have.attr', 'aria-disabled', 'true')
+        cy.get('a[data-test-id="sharing"]').should('have.attr', 'aria-disabled', 'true')
+
     } catch (error) {
         //!isDisabled
     }
-//return isDisabled
+    //return isDisabled
 })
 
 Cypress.Commands.add('isProjectPropertiesEnabled', () => {
-   
+
     try {
-    
+
         //assert material, in/exteriors are disabled on newly added project
         cy.get('a[data-test-id="material"]').should('not.have.attr', 'aria-disabled')
         cy.get('a[data-test-id="interiors"]').should('not.have.attr', 'aria-disabled')
         cy.get('a[data-test-id="exteriors"]').should('not.have.attr', 'aria-disabled')
         cy.get('a[data-test-id="sharing"]').should('not.have.attr', 'aria-disabled')
     } catch (error) {
-       
+
     }
 })
 
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
-    cy.get('[data-test-id="userName"]').type(userName).should('have.value',userName)
+    cy.get('[data-test-id="userName"]').type(userName).should('have.value', userName)
     cy.get('[data-test-id="password"]').type(password)
 })
+
+Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {
+    //verify url
+    cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+    cy.get('[data-test-id="accSettings"]').click()
+    cy.get('div[data-test-id="userProfileBtn""]').click()
+    cy.get('input[name="loginName"]').should('have.value', id)
+    cy.get('input[name="password"]').type(oldPassword)
+    cy.get('input[name="newPassword"]').type(newPassword)
+    cy.get('input[name="repeatPassword"]').type(newPassword)
+})
+
 
 Cypress.Commands.add('logOutCmd', () => {
     //log out
     cy.get('[data-test-id="accSettings"]').click()
     cy.get('[data-test-id="signOutBtn"]').click()
     //verify url
-    cy.url().should('eq',Cypress.config().baseUrl+'sign-in')
+    cy.url().should('eq', Cypress.config().baseUrl + 'sign-in')
 })
 
-Cypress.Commands.add ('insertRequiredFieldForAddnew', (projNumber,projName) => {
+Cypress.Commands.add('insertRequiredFieldForAddnew', (projNumber, projName) => {
 
     cy.get('input[name="number"]').type(projNumber)
     cy.get('input[name="name"]').type(projName)

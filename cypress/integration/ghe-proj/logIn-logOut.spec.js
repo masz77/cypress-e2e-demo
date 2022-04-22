@@ -48,8 +48,9 @@ describe ('log in / change password / log out', () => {
             let test1_oldPwd = this.usersData.test1.currentPassword
             let test1_newPwd = this.usersData.test1.newPassword
             cy.logInCmd(test1_id,test1_oldPwd).type('{enter}')
-            //verify url
-            cy.url().should('eq',Cypress.config().baseUrl+'admin/dashboard')
+            cy.changePassword(test1_id,test1_oldPwd,test1_newPwd)
+      
+
         })
 
         it('log in with new password -> change to old password', function() {
