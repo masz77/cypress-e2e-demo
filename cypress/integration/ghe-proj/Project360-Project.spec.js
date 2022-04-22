@@ -64,7 +64,10 @@ describe('project360 - project tab functionalities', () => {
         //loop thru each input tag and type in value
       })
       it('copy from other project', () => {
-
+        //more settings button
+        cy.get('button[data-test-id="matSettings"]').click()
+        //copy from other proj button
+        cy.get('li[data-test-id="matCopy"]').click()
       })
       it('modify existing project', () => {
 
