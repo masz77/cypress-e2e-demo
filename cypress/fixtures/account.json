@@ -1,0 +1,17 @@
+{
+  "admin" : {
+    "userName": "admin",
+    "currentPassword": "admin",
+    "newPassword": "admin"
+  },
+  "test1" : {
+    "userName": "b2s.test1",
+    "currentPassword": "12345678",
+    "newPassword": "newp@ssw0rd1@34%6"
+  },
+  "test2" : {
+    "userName": "b2s.test2",
+    "currentPassword": "12345678",
+    "newPassword": "newp@ssw0rd1@34%6"
+  }
+}
