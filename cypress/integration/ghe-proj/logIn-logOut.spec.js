@@ -58,6 +58,7 @@ describe('log in / change password / log out', () => {
             //close pro5 panel
             cy.get('button',{timeout: 20000}).contains('Close').should('be.visible').should('be.enabled').click()
             cy.logOutCmd()
+            
         })
 
         it('log in with new password -> change to old password', function () {
