@@ -49,7 +49,7 @@ Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
     cy.get('[data-test-id="accSettings"]').click()
-    cy.get('div[data-test-id="userProfileBtn""]').click()
+    cy.get('div[data-test-id="userProfileBtn"]').should('be.visible').click()
     cy.get('input[name="loginName"]').should('have.value', id)
     cy.get('input[name="password"]').type(oldPassword)
     cy.get('input[name="newPassword"]').type(newPassword)
