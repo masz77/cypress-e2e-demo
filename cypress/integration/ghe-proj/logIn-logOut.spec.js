@@ -11,17 +11,10 @@ describe('log in / change password / log out', () => {
     context('log in successfully and log out', () => {
         beforeEach('visit the main page', () => {
             cy.visit(Cypress.config().baseUrl)
-            //   cy.fixture('account.json').as('usersData')
-            // cy.intercept('POST','/api/v1/user/login').as('logInStatus')
-
         })
 
         it('1/ has correct username/password -> expect: log in successfully', () => {
-
             cy.logInCmd('admin', 'admin')
-            //verify status code
-            // cy.intercept('POST','/api/v1/user/login').as('logInStatus')
-
             cy.get('button[data-test-id="signInBtn"]').contains('OK').click()
 
             cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [200])
@@ -43,11 +36,6 @@ describe('log in / change password / log out', () => {
     })
 
     context('log in -> change password -> log out -> log in with new password -> change to old password -> log out', () => {
-        // beforeEach ('get user data from fixture', function() {
-        //     let test1_id = this.usersData.test1.userName
-        //     let test1_oldPwd = this.usersData.test1.currentPassword
-        //     let test1_newPwd = this.usersData.test1.newPassword
-        // })
         it('log in -> change password fail -> change password success', function () {
             let test1_id = this.usersData.test1.userName
             let test1_oldPwd = this.usersData.test1.currentPassword

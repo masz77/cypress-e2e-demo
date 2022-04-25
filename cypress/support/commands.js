@@ -10,6 +10,12 @@
 //
 //
 // -- This is a parent command --
+Cypress.Commands.add('fillInMaterialDetail', function(number, name, brand) {
+    cy.get('input[name="number"]').clear().type(number)
+    cy.get('input[name="name"]').clear().type(name)
+    cy.get('input[name="brand"]').clear().type(brand)
+})
+
 Cypress.Commands.add('isProjectPropertiesDisabled', () => {
     //let isDisabled = true;
     try {
