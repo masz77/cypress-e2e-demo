@@ -59,6 +59,25 @@ describe('project360 - material tab functionalities', () => {
         //navigate to project
         cy.get('a[href="/admin/material"]').click()
         cy.url().should('contain', 'admin/material')
+
+        //get the last modify button and click
+        cy.get('button[data-test-id="actMod"]').last().click()
+        cy.contains('Material detail').should('be.visible')
+
+        //try save button
+        cy.fillInMaterialDetail('modified-number', 'modified-name', 'modified-brand')
+        cy.get('button[data-test-id="saveBtn"]').click()
+        cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
+        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+
+        //navigate to project
+        cy.get('a[href="/admin/material"]').click()
+        cy.url().should('contain', 'admin/material')
+        let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
+            cy.get('td').should('contain','modified-number')
+                        .should('contain','modified-name')
+                        .should('contain','modified-brand')
+        })
       })
     })
 })
