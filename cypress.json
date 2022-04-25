@@ -10,6 +10,6 @@
         "embeddedScreenshots": true,
         "inlineAssets": true
   },
-    "selectorPriority": ["data-test-id","id", "class", "attributes","data-testid"],
+    "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
     "experimentalStudio": true
 }

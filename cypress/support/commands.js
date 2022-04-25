@@ -41,8 +41,8 @@ Cypress.Commands.add('isProjectPropertiesEnabled', () => {
 
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
-    cy.get('[data-test-id="userName"]').type(userName).should('have.value', userName)
-    cy.get('[data-test-id="password"]').type(password)
+    cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
+    cy.get('[data-test-id="password"]').clear().type(password)
 })
 
 Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {
@@ -51,9 +51,9 @@ Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {
     cy.get('[data-test-id="accSettings"]').click()
     cy.get('div[data-test-id="userProfileBtn"]').should('be.visible').click()
     cy.get('input[name="loginName"]').should('have.value', id)
-    cy.get('input[name="password"]').type(oldPassword)
-    cy.get('input[name="newPassword"]').type(newPassword)
-    cy.get('input[name="repeatPassword"]').type(newPassword)
+    cy.get('input[name="password"]').clear().type(oldPassword)
+    cy.get('input[name="newPassword"]').clear().type(newPassword)
+    cy.get('input[name="repeatPassword"]').clear().type(newPassword)
 })
 
 
