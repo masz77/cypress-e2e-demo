@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -10,11 +12,57 @@
 //
 //
 // -- This is a parent command --
-Cypress.Commands.add('fillInMaterialDetail', function(number, name, brand) {
-    cy.get('input[name="number"]').clear().type(number)
-    cy.get('input[name="name"]').clear().type(name)
-    cy.get('input[name="brand"]').clear().type(brand)
+//
+//
+// -- This is a child command --
+// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
+//
+//
+// -- This is a dual command --
+// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
+//
+//
+// -- This will overwrite an existing command --
+// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+
+//navigate to status
+Cypress.Commands.add('navigateTo',  function projectStatus () {
+    cy.get('a[href="/admin/project-status"]').click()
+    cy.url().should('contain', 'admin/project-status')
+},
+function project () {
+    cy.get('a[href="/admin/project"]').click()
+    cy.url().should('contain', 'admin/project')
+},
+function material () {
+    cy.get('a[href="/admin/material"]').click()
+    cy.url().should('contain', 'admin/material')
+},
+
+)
+
+Cypress.Commands.add('logInAsAdmin', () => {
+    cy.visit(Cypress.config().baseUrl, {timeout: 15000})
+    cy.logInCmd('admin', 'admin').type('{enter}')
+    cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 })
+
+Cypress.Commands.add('fillInDetail', (number, name, brand) => {
+    if (brand == null) {
+        cy.get('input[name="number"]').clear().type(number)
+        cy.get('input[name="name"]').clear().type(name)
+    } else {
+        cy.get('input[name="number"]').clear().type(number)
+        cy.get('input[name="name"]').clear().type(name)
+        cy.get('input[name="brand"]').clear().type(brand)
+    }
+})
+
+// Cypress.Commands.overwrite('fillInDetail', (number, name) => {
+//     cy.get('input[name="number"]').clear().type(number)
+//     cy.get('input[name="name"]').clear().type(name)
+// })
 
 Cypress.Commands.add('isProjectPropertiesDisabled', () => {
     //let isDisabled = true;
@@ -76,15 +124,12 @@ Cypress.Commands.add('insertRequiredFieldForAddnew', (projNumber, projName) => {
     cy.get('input[name="number"]').type(projNumber)
     cy.get('input[name="name"]').type(projName)
 })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+// declare namespace Cypress {
+//     interface Chainable {
+//         insertRequiredFieldForAddnew: (projNumber: string, projName: string) => Cypress.Chainable<JQuery>;
+//         logOutCmd: () => Cypress.Chainable<JQuery>;
+//         changePassword: (id: string, oldPassword: string, newPassword: string)
+//     }
+// }
+

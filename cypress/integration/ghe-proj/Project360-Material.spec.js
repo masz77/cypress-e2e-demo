@@ -5,7 +5,7 @@ describe('project360 - material tab functionalities', () => {
     beforeEach('add api listener', () => {
         cy.intercept('POST', '/api/v1/material').as('matSaveStatus')
         cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
-        //on failed event
+        //on failed event - ignore failed
         // cy.on('fail', (e) => {
         //   console.error(e)
         // })
@@ -39,12 +39,10 @@ describe('project360 - material tab functionalities', () => {
       it('reset button', () => {
 
         //try reset button
-        cy.fillInMaterialDetail('1','1','1')
+        cy.fillInDetail('1','1','1')
         cy.get('button[data-test-id="reset"]').click()
         //assert empty
         cy.get('input[name="number"]').invoke('val').should('be.empty')
-        // cy.get('input[name="name"]').should('be.empty')
-        // cy.get('input[name="brand"]').should('be.empty')
         cy.get('input[name="name"]').invoke('val').should('be.empty')
         cy.get('input[name="brand"]').invoke('val').should('be.empty')
       })
@@ -52,10 +50,35 @@ describe('project360 - material tab functionalities', () => {
       it('save button', () => {
 
         //try save button
-        cy.fillInMaterialDetail('test-number', 'test-name', 'test-brand')
+        cy.fillInDetail('test-number', 'test-name', 'test-brand')
         cy.get('button[data-test-id="saveBtn"]').click()
         cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+      })
+
+      it('modify', () => {
+        //navigate to project
+        cy.get('a[href="/admin/material"]').click()
+        cy.url().should('contain', 'admin/material')
+
+        //get the last modify button and click
+        cy.get('button[data-test-id="actMod"]').last().click()
+        cy.contains('Material detail').should('be.visible')
+
+        //try save button
+        cy.fillInDetail('modified-number', 'modified-name', 'modified-brand')
+        cy.get('button[data-test-id="saveBtn"]').click()
+        cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
+        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+
+        //navigate to project
+        cy.get('a[href="/admin/material"]').click()
+        cy.url().should('contain', 'admin/material')
+        let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
+            cy.get('td').should('contain','modified-number')
+                        .should('contain','modified-name')
+                        .should('contain','modified-brand')
+        })
       })
 
       it('delete', () => {
@@ -71,30 +94,6 @@ describe('project360 - material tab functionalities', () => {
         cy.wait('@matDeleteStatus').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
       })
-
-      it('modify', () => {
-        //navigate to project
-        cy.get('a[href="/admin/material"]').click()
-        cy.url().should('contain', 'admin/material')
-
-        //get the last modify button and click
-        cy.get('button[data-test-id="actMod"]').last().click()
-        cy.contains('Material detail').should('be.visible')
-
-        //try save button
-        cy.fillInMaterialDetail('modified-number', 'modified-name', 'modified-brand')
-        cy.get('button[data-test-id="saveBtn"]').click()
-        cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
-        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-
-        //navigate to project
-        cy.get('a[href="/admin/material"]').click()
-        cy.url().should('contain', 'admin/material')
-        let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
-            cy.get('td').should('contain','modified-number')
-                        .should('contain','modified-name')
-                        .should('contain','modified-brand')
-        })
-      })
+      
     })
 })

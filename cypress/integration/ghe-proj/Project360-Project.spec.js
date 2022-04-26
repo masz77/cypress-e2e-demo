@@ -17,7 +17,7 @@ describe('project360 - project tab functionalities', () => {
       cy.isProjectPropertiesDisabled()
     })
 
-    it.skip('creates new project with details', () => {
+    it('creates new project with details', () => {
       //fill in required field
       cy.insertRequiredFieldForAddnew('project-number', 'project-name')
       //click reset

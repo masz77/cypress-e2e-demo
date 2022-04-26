@@ -1,6 +1,6 @@
 {
     "video": false,
-    "defaultCommandTimeout": 15000,
+    "defaultCommandTimeout": 5000,
     "baseUrl": "http://ghe-staging.b2ssolution.com/",
     "reporter": "cypress-mochawesome-reporter",
     "reporterOptions": {
