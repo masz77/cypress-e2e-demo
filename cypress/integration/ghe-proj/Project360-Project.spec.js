@@ -1,11 +1,7 @@
 /// <reference types="cypress" />
 
 describe('project360 - project tab functionalities', () => {
-  // beforeEach('visit the main page and log in', () => {
-  //   cy.visit(Cypress.config().baseUrl)
-  //   cy.logInCmd('admin','admin').type('{enter}')
-  //   cy.url().should('eq',Cypress.config().baseUrl+'admin/dashboard')
-  // })
+
   context('creates new project with details', () => {
     it('add new', () => {
       //log in and assert
@@ -20,7 +16,8 @@ describe('project360 - project tab functionalities', () => {
       cy.url().should('contain', 'admin/project/new')
       cy.isProjectPropertiesDisabled()
     })
-    it('creates new project with details', () => {
+
+    it.skip('creates new project with details', () => {
       //fill in required field
       cy.insertRequiredFieldForAddnew('project-number', 'project-name')
       //click reset
@@ -44,9 +41,7 @@ describe('project360 - project tab functionalities', () => {
   })
 
   context('modify projects properties', () => {
-    // beforeEach('go to project tab', () => {
-
-    // })
+    
     context('material', () => {
       beforeEach('go to project -> modify the last project', () => {
         //navigate to project
@@ -61,6 +56,7 @@ describe('project360 - project tab functionalities', () => {
       it('add new', () => {
         cy.get('button').contains('Add new').click()
         //get the master div contain 7 input tag
+        cy.get('input[type="text"]').should('be.visible')
         //loop thru each input tag and type in value
       })
       it('copy from other project', () => {
@@ -78,7 +74,18 @@ describe('project360 - project tab functionalities', () => {
     })
 
     context('interior', () => {
-
+      //add new
+      //random name
+      //save
+      //close
+      //assert span Not uploaded image yet
+      //modify
+      //assert "Edit interior"
+      //button upload
+      //button contain ok
+      //assert  api/v1/interiorview/upload 200
+      //assert pop up contain success
+      //assert Uploaded file
     })
 
   })
