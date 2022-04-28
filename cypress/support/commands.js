@@ -32,13 +32,13 @@ Cypress.Commands.add('clickAddNewButton', () => {
 Cypress.Commands.add('navigateTo', (page) => {
     try {
         if(page == 'project' ||page == 'material' ||page == 'project-status') {
-            cy.get(`a[href="/admin/${page}"]`).click()
+            cy.get(`a[href="/admin/${page}"]`).click({force: true})
             cy.url().should('contain', `admin/${page}`)
         } else {
-            cy.log ('Allowed value are: project, material, status')
+            cy.log ('Allowed value are: project, material, project-status')
         } 
     } catch (error) {
-        
+        cy.log ('Allowed value are: project, material, project-status')
     }
 }
 

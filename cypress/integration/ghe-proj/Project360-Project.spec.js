@@ -41,14 +41,12 @@ describe('project360 - project tab functionalities', () => {
   })
 
   context('modify projects properties', () => {
-    
     context('material', () => {
       beforeEach('go to project -> modify the last project', () => {
         //navigate to project
         // cy.get('a[href="/admin/project"]').click()
         cy.navigateTo('project')
         // cy.url().should('contain', 'admin/project')
-
         //click modify
         cy.get('button[data-test-id="actMod"]').last().click()
         cy.get('div > h5').contains('Project detail').should('be.visible')
@@ -60,7 +58,7 @@ describe('project360 - project tab functionalities', () => {
         // cy.clickAddNewButton()
         //get the master div contain 7 input tag
         //loop thru each input tag and type in value
-        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list)=>{
+        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
           if (index == 0) {
             //at 1st element -> dropdown list select
             cy.wrap($el).click()
@@ -68,14 +66,30 @@ describe('project360 - project tab functionalities', () => {
               .should('be.visible')
               .last()
               .click()
-            
           } else {
             //at other element -> type
             cy.wrap($el).type('69420')
+            // cy.get('div[role=presentation] ul[role=listbox] li[role=option]').should('not.be.empty')
+          }
+        })
+        //assertion
+        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
+          if (index == 0) {
+            cy.wrap($el).invoke('val').should('not.be.empty')
+          } else {
+            cy.wrap($el).invoke('val').should('not.be.empty')
           }
         })
         //save
         cy.get('button[data-test-id="saveBtn"]').click()
+        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+        cy.get('div[data-testid="pagination-rows"]').click().select('100')
+      })
+      it('modify existing project', () => {
+
+      })
+      it('delete existing project', () => {
+
       })
       it.skip('copy from other project', () => {
         //more settings button
@@ -83,12 +97,7 @@ describe('project360 - project tab functionalities', () => {
         //copy from other proj button
         cy.get('li[data-test-id="matCopy"]').click()
       })
-      it.skip('modify existing project', () => {
 
-      })
-      it.skip('fill in data and save', () => {
-
-      })
     })
 
     context('interior', () => {
