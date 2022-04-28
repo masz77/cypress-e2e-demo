@@ -24,7 +24,7 @@ describe('project360 - material tab functionalities', () => {
         cy.url().should('contain', 'admin/material')
         
         //click add new
-        cy.get('a[data-test-id="addNewBtn"]').click()
+        cy.clickAddNewButton()
         cy.get('div').contains('New material').should('be.visible')
       })
 
@@ -57,10 +57,9 @@ describe('project360 - material tab functionalities', () => {
       })
 
       it('modify', () => {
-        //navigate to project
-        cy.get('a[href="/admin/material"]').click()
-        cy.url().should('contain', 'admin/material')
-
+        //navigate to material
+        cy.navigateTo().material
+        
         //get the last modify button and click
         cy.get('button[data-test-id="actMod"]').last().click()
         cy.contains('Material detail').should('be.visible')
@@ -71,9 +70,9 @@ describe('project360 - material tab functionalities', () => {
         cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 
-        //navigate to project
-        cy.get('a[href="/admin/material"]').click()
-        cy.url().should('contain', 'admin/material')
+        //navigate to material
+        cy.navigateTo().material
+        
         let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
             cy.get('td').should('contain','modified-number')
                         .should('contain','modified-name')
@@ -82,9 +81,8 @@ describe('project360 - material tab functionalities', () => {
       })
 
       it('delete', () => {
-        //navigate to project
-        cy.get('a[href="/admin/material"]').click()
-        cy.url().should('contain', 'admin/material')
+        //navigate to material
+        cy.navigateTo().material
 
         //get the last delete button and click
         cy.get('button[data-test-id="actDel"]').last().click()

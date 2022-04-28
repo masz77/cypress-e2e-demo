@@ -14,7 +14,12 @@ declare namespace Cypress {
         isProjectPropertiesDisabled:() => Cypress.Chainable<JQuery>;
         fillInDetail: (number: string, name: string, brand: string) => Cypress.Chainable<JQuery>;
         logInAsAdmin: () => Cypress.Chainable<JQuery>;
-        navigateTo: () => Cypress.Chainable<JQuery>;
-        projectStatus: () => Cypress.Chainable<JQuery>;
+        // navigateTo: () => Cypress.Chainable<JQuery>;
+        // projectStatus: () => Cypress.Chainable<JQuery>;
+        // project: () => Cypress.Chainable<JQuery>;
+        // material: () => Cypress.Chainable<JQuery>;
+        clickAddNewButton: () => Cypress.Chainable<JQuery>;
+
+        
     }
   }
