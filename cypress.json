@@ -1,15 +1,16 @@
 {
     "video": false,
-    "defaultCommandTimeout": 10000,
+    "defaultCommandTimeout": 15000,
     "baseUrl": "http://ghe-staging.b2ssolution.com/",
     "reporter": "cypress-mochawesome-reporter",
     "reporterOptions": {
         "reportDir": "cypress/reports",
         "charts": true,
-        "reportPageTitle": "My Test Suite",
+        "reportPageTitle": "Ghe Project Suite",
         "embeddedScreenshots": true,
-        "inlineAssets": true
+        "inlineAssets": true      
   },
     "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
-    "experimentalStudio": true
+    "experimentalStudio": true,
+    "screenshotOnRunFailure": false
 }

@@ -31,7 +31,7 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
     try {
-        if(page == 'project' ||page == 'status' ||page == 'status') {
+        if(page == 'project' ||page == 'material' ||page == 'project-status') {
             cy.get(`a[href="/admin/${page}"]`).click()
             cy.url().should('contain', `admin/${page}`)
         } else {

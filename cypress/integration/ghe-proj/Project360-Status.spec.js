@@ -17,7 +17,7 @@ describe('project360 - status tab functionalities', () => {
       cy.logInAsAdmin()
 
       //navigate to status
-      cy.navigateTo().projectStatus
+      cy.navigateTo('project-status')
 
       //click add new
       cy.clickAddNewButton()
@@ -53,7 +53,7 @@ describe('project360 - status tab functionalities', () => {
 
     it('modify', () => {
       //navigate to project status
-      cy.navigateTo().status
+      cy.navigateTo('project-status')
 
       //get the last modify button and click
       cy.get('button[data-test-id="actMod"]').last().click()
@@ -66,7 +66,7 @@ describe('project360 - status tab functionalities', () => {
       cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 
       //navigate to project status
-      cy.navigateTo().status
+      cy.navigateTo('project-status')
       
       cy.get('tbody > tr').last().should('be.visible').within(() => {
         cy.get('td').should('contain', 'modified-number')
@@ -78,7 +78,7 @@ describe('project360 - status tab functionalities', () => {
       //navigate to project
       // cy.get('a[href="/admin/project-status"]').click()
       // cy.url().should('contain', 'admin/project-status')
-      cy.navigateTo().status
+      cy.navigateTo('project-status')
 
 
       //get the last delete button and click
