@@ -41,9 +41,7 @@ describe('project360 - project tab functionalities', () => {
     context('material', () => {
       beforeEach('go to project -> modify the last project', () => {
         //navigate to project
-        // cy.get('a[href="/admin/project"]').click()
         cy.navigateTo('project')
-        // cy.url().should('contain', 'admin/project')
         //click modify
         cy.get('button[data-test-id="actMod"]').last().click()
         //get projectID
@@ -51,14 +49,17 @@ describe('project360 - project tab functionalities', () => {
           //get project id
           const array = text.split('/')
           const projectID = array[array.length - 1]
+          //save material properties inside project
           cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
-          // cy.log(projectID)
+          //after saving FE will try to re-query the page
+          cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
         })
 
         cy.get('div > h5').contains('Project detail').should('be.visible')
         cy.isProjectPropertiesEnabled()
         cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
       })
+      
       it('add new material details', () => {
         let dataTest = [null,'69,420']
         cy.get('button').contains('Add new').click()
@@ -79,15 +80,11 @@ describe('project360 - project tab functionalities', () => {
           } else {
             //at other element -> type
             cy.wrap($el).type(dataTest[1])
-            // cy.get('div[role=presentation] ul[role=listbox] li[role=option]').should('not.be.empty')
           }
         })
         //assert data entered
         cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
           if (index == 0) {
-            // let firstValue = cy.wrap($el).invoke('val')
-            // dataTest[0] = cy.wrap($el).invoke('val').toString()
-            // cy.log(dataTest[0])
             cy.wrap($el).invoke('val').should('not.be.empty')
           } else {
             cy.wrap($el).invoke('val').should('eq',dataTest[1])
@@ -98,29 +95,10 @@ describe('project360 - project tab functionalities', () => {
         cy.get('button[data-test-id="saveBtn"]').click()
         cy.wait('@modifyingProject').then((interception) => {
           assert.equal(interception.response.statusCode,200)
-          cy.log(interception.response.body.data.material.text)
-          // interception.its('response.statusCode').should('be.oneOf', [200])
-          // interception.its('response.body')
         })
+        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+        cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-        //pagination to 100
-        // cy.get('div[data-testid="pagination-rows"]').click()
-        // cy.get('ul[data-testid="pagination-menu-list"] > li[role="option"]').last().click()
-        // cy.get('div[data-testid="pagination-rows"]').should('contains','100')
-        //get the last row of material to assert UI
-        // cy.get('tr[data-test-id="row"]').last().within(() => {
-        //   cy.get('td').each(($el, index, $list) => {
-        //     if (index != 0) {
-        //       if (index == 1) {
-        //         // cy.wrap($el).should('contain',dataTest[0])
-        //         cy.wrap($el).invoke('val').should('contain','modified-name')
-        //       } else {
-        //         cy.wrap($el).invoke('val').should('contain',dataTest[1])
-        //       }
-        //     }
-        //   })
-        // })
-        
       })
       it('modify existing project', () => {
 
