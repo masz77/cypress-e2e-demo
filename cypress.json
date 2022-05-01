@@ -13,6 +13,6 @@
     "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
     "experimentalStudio": true,
     "screenshotOnRunFailure": false,
-    "viewportWidth": 1920,
-    "viewportHeight": 1080
+    "viewportWidth": 1280,
+    "viewportHeight": 720
 }
