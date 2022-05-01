@@ -6,10 +6,13 @@
     "reporterOptions": {
         "reportDir": "cypress/reports",
         "charts": true,
-        "reportPageTitle": "My Test Suite",
+        "reportPageTitle": "Ghe Project Suite",
         "embeddedScreenshots": true,
-        "inlineAssets": true
+        "inlineAssets": true      
   },
     "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
-    "experimentalStudio": true
+    "experimentalStudio": true,
+    "screenshotOnRunFailure": false,
+    "viewportWidth": 1920,
+    "viewportHeight": 1080
 }
