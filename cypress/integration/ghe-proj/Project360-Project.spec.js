@@ -53,15 +53,17 @@ describe('project360 - project tab functionalities', () => {
           cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
           //after saving FE will try to re-query the page
           cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
+          //api/v1/material/project delete route
+          cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
         })
 
         cy.get('div > h5').contains('Project detail').should('be.visible')
         cy.isProjectPropertiesEnabled()
         cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
       })
-      
-      it('add new material details', () => {
-        let dataTest = [null,'69,420']
+
+      it.skip('add new material details', () => {
+        let dataTest = [null, '69,420']
         cy.get('button').contains('Add new').click()
         //click save right away -> should fail
         cy.get('button[data-test-id="saveBtn"]').click()
@@ -87,25 +89,56 @@ describe('project360 - project tab functionalities', () => {
           if (index == 0) {
             cy.wrap($el).invoke('val').should('not.be.empty')
           } else {
-            cy.wrap($el).invoke('val').should('eq',dataTest[1])
+            cy.wrap($el).invoke('val').should('eq', dataTest[1])
             // cy.wrap($el).should('eq',dataTest[1])
           }
         })
         //save
         cy.get('button[data-test-id="saveBtn"]').click()
         cy.wait('@modifyingProject').then((interception) => {
-          assert.equal(interception.response.statusCode,200)
+          assert.equal(interception.response.statusCode, 200)
         })
         // then Re-Querying The Page -> expect to havve this or we'll have a query loop
         cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       })
+
       it('modify existing project', () => {
-
+        cy.get('button[data-test-id="actMod"]').last().click()
+        const dataTest_modified = '9999'
+        //loop thru each input tag and type in value
+        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
+          if (index == 0) {
+            cy.wrap($el).invoke('val').should('not.be.empty')
+          } else {
+            //at other element -> type
+            cy.wrap($el).type(dataTest_modified)
+          }
+        })
+        //save
+        cy.get('button[data-test-id="saveBtn"]').click()
+        cy.wait('@modifyingProject').then((interception) => {
+          assert.equal(interception.response.statusCode, 200)
+        })
+        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+        cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
+        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       })
-      it('delete existing project', () => {
 
+      it('delete an existing material from current project', () => {
+        //click last delete button
+        cy.get('button[data-test-id="actDel"]').last().click()
+        //confirm
+        cy.get('button').contains('OK').click()
+        // Assertion
+        cy.wait('@deleteMaterialOfAProject').then((interception) => {
+          assert.equal(interception.response.statusCode, 200)
+        })
+        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+        cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
+        cy.get('div[role="status"]').contains('Deleted successfully!').should('exist').and('be.visible')
       })
+
       it.skip('copy from other project', () => {
         //more settings button
         cy.get('button[data-test-id="matSettings"]').click()
