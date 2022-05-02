@@ -81,19 +81,24 @@ Cypress.Commands.add('fillInDetail', (number, name, brand) => {
 //     cy.get('input[name="name"]').clear().type(name)
 // })
 
-Cypress.Commands.add('isProjectPropertiesDisabled', () => {
-    //let isDisabled = true;
+Cypress.Commands.add('isProjectProperties', (expected) => {
+    
+    const _selector = ['material','interiors','exteriors','sharing']
     try {
-        //check 3 others buttons mat,in/exterior are disabled
-        cy.get('a[data-test-id="material"]').should('have.attr', 'aria-disabled', 'true')
-        cy.get('a[data-test-id="interiors"]').should('have.attr', 'aria-disabled', 'true')
-        cy.get('a[data-test-id="exteriors"]').should('have.attr', 'aria-disabled', 'true')
-        cy.get('a[data-test-id="sharing"]').should('have.attr', 'aria-disabled', 'true')
-
+        if (expected == 'disabled') {
+            for (let i = 0; i < _selector.length; i++) {
+                const _element = _selector[i];
+                return cy.get(`a[data-test-id="${_element}"]`).should('have.attr', 'aria-disabled', 'true')
+            }
+        } else if (expected == 'enabled') {
+            for (let i = 0; i < _selector.length; i++) {
+                const _element = _selector[i];
+                return cy.get(`a[data-test-id="${_element}"]`).should('not.have.attr', 'aria-disabled', 'true')
+            }
+        }
     } catch (error) {
         //!isDisabled
     }
-    //return isDisabled
 })
 
 Cypress.Commands.add('isProjectPropertiesEnabled', () => {

@@ -9,13 +9,13 @@ describe('project360 - project tab functionalities', () => {
       cy.logInAsAdmin()
     })
 
-    it.skip('add new', () => {
+    it('add new', () => {
       //navigate to project
       cy.navigateTo('project')
       //click add new
       cy.clickAddNewButton()
       cy.url().should('contain', 'admin/project/new')
-      cy.isProjectPropertiesDisabled()
+      cy.isProjectProperties('disabled')
     })
 
     it.skip('creates new project with details', () => {
@@ -33,11 +33,7 @@ describe('project360 - project tab functionalities', () => {
       cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
       //assert material, in/exteriors are disabled on newly added project
-      cy.get('a[data-test-id="material"]').should('not.have.attr', 'aria-disabled')
-      cy.get('a[data-test-id="interiors"]').should('not.have.attr', 'aria-disabled')
-      cy.get('a[data-test-id="exteriors"]').should('not.have.attr', 'aria-disabled')
-      cy.get('a[data-test-id="sharing"]').should('not.have.attr', 'aria-disabled')
-
+      cy.isProjectProperties('enabled')
     })
   })
 
