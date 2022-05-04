@@ -88,16 +88,16 @@ Cypress.Commands.add('isProjectProperties', (expected) => {
         if (expected == 'disabled') {
             for (let i = 0; i < _selector.length; i++) {
                 const _element = _selector[i];
-                return cy.get(`a[data-test-id="${_element}"]`).should('have.attr', 'aria-disabled', 'true')
+                cy.get(`a[data-test-id="${_element}"]`).should('have.attr', 'aria-disabled', 'true')
             }
         } else if (expected == 'enabled') {
             for (let i = 0; i < _selector.length; i++) {
                 const _element = _selector[i];
-                return cy.get(`a[data-test-id="${_element}"]`).should('not.have.attr', 'aria-disabled', 'true')
+                cy.get(`a[data-test-id="${_element}"]`).should('not.have.attr', 'aria-disabled', 'true')
             }
         }
     } catch (error) {
-        //!isDisabled
+        cy.log(error)
     }
 })
 

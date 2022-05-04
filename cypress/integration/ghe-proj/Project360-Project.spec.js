@@ -9,7 +9,7 @@ describe('project360 - project tab functionalities', () => {
       cy.logInAsAdmin()
     })
 
-    it('add new', () => {
+    it.skip('add new', () => {
       //navigate to project
       cy.navigateTo('project')
       //click add new
@@ -44,8 +44,7 @@ describe('project360 - project tab functionalities', () => {
       //click modify
       cy.get('button[data-test-id="actMod"]').last().click()
       //assert
-      cy.get('div > h5').contains('Project detail').should('be.visible')
-      cy.isProjectPropertiesEnabled()
+      cy.isProjectProperties('enabled')
     })
 
     context.skip('material', () => {
@@ -180,50 +179,62 @@ describe('project360 - project tab functionalities', () => {
           //get project id
           const array = text.split('/')
           const projectID = array[array.length - 1]
-          cy.log(projectID)
+          cy.log(`projectID = ${projectID}`)
           //save new interior properties inside project
           cy.intercept('POST', `/api/v1/interiorview/project/${projectID}`).as('saveAsNewInterior')
-          //after saving FE will try to re-query the page
-          // cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
-          //api/v1/material/project delete route
-          // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
-          // api/v1/material/project/21/copy copy material from existing project
-          // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
-
+          //upload api
+          cy.intercept('POST', `/api/v1/interiorview/upload`).as('uploadAPI')
+          //re-query the page
+          cy.intercept('GET', `/api/v1/interiorview?p=0&projectId=${projectID}&ps=10`).as('refreshPage')
         })
         //go to material tab of that project
         cy.get('div[role="tablist"] > a[data-test-id="interiors"]').click()
       })
-      it('add new interior', () => {
+      it('add new interior', function() {
+        const typeARandomName = 'auto-typed new interior'
         //add new
-
         cy.get('button').contains('Add new').click()
-
-        // cy.get('h2').should('contains','New interior')
         //random name
-
-        cy.get('input[name="name"]').type('auto-typed New interior')
+        cy.get('input[name="name"]').type(typeARandomName)
         //save
         cy.get('button[data-test-id="saveBtn"]').click()
         //assert api
-        cy.wait('@saveAsNewInterior', {
-          timeout: 10000
-        }).its('response.statusCode').should('be.oneOf', [200])
+        cy.wait('@saveAsNewInterior').its('response.statusCode').should('be.oneOf', [200])
         //press escape
         cy.get('body').type('{esc}');
+        //wait /api/v1/interiorview?p=0&projectId=22&ps=10
+        cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
+        //need to optimize
+        cy.wait(2000)
         //assert span Not uploaded image yet
-        //modify
-        //assert "Edit interior"
+        cy.get('tr[data-test-id="row"]').last().within(() => {
+          //get the span INSIDE the row
+          cy.get('span').contains('Not uploaded image yet').should('exist')
+          //click modify
+          cy.get('button[data-test-id="actMod"]').click()
+        })
+        
+        //assert the interior name
+        cy.get('input[name="name"]').invoke('val').should('eq',typeARandomName)
         //button upload
-        cy.get('button[data-test-id="uploadImgBtn"]')
-          .should('exist')
-          .selectFile('/images/DJI_0013.jpg', {
+        cy.fixture('/images/Bep_T1.jpg', {
           encoding: 'binary'
-        });
+        }).as('uploadImg')
+        cy.get('input[type="file"]')
+          .selectFile('@uploadImg',{force: true})
         //button contain ok
-        //assert  api/v1/interiorview/upload 200
+        cy.get('button').contains('OK').click()
+        //assert  api/v1/interiorview/upload 200 until its body contain data.continue = false
+        cy.wait('@uploadAPI',{timeout: 30000}).then((interception) => {
+          const _body = interception.response.body
+          cy.log(_body.data)
+          // expect(interception.response.body).prop('data')[2].to.eq(false)
+          // interception.response.body.data.continue
+        })
+        //Upload success
         //assert pop up contain success
         //assert Uploaded file
+        //Upload fail
       })
 
     })
