@@ -193,12 +193,13 @@ describe('project360 - project tab functionalities', () => {
           // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
           // api/v1/material/project/21/copy copy material from existing project
           // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
-
+          //delete an interior at /api/v1/interiorview
+          cy.intercept('DELETE', `/api/v1/interiorview`).as('deleteInterior')
         })
         //go to material tab of that project
         cy.get('div[role="tablist"] > a[data-test-id="interiors"]').click()
       })
-      it('add new interior', () => {
+      it.skip('add new interior', () => {
         //add new
 
         cy.get('button').contains('Add new').click()
@@ -230,34 +231,48 @@ describe('project360 - project tab functionalities', () => {
         //assert Uploaded file
       })
 
+
+      it('delete existing interior', () => {
+        cy.get('button[data-test-id="actDel"]').last().click()
+        cy.get('button').contains('OK').click()
+        //deleteInterior api
+        cy.wait('@deleteInterior').its('response.statusCode').should('be.oneOf', [200])
+        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+        // cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
+        //Deleted successfully
+        cy.get('div[role="status"]').contains('Deleted successfully').should('exist').and('be.visible')
+      })
     })
 
-    // context.skip('exterior', () => {      
-    //   beforeEach('set up api endpoint listener', () => {
+    context('exterior', () => {      
+      beforeEach('set up api endpoint listener', () => {
+      //get projectID
+      cy.url().then((text) => {
+        //get project id
+        const array = text.split('/')
+        const projectID = array[array.length - 1]
+        //save material properties inside project
+        // cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
+        //after saving FE will try to re-query the page
+        // cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
+        //api/v1/material/project delete route
+        // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
+        // api/v1/material/project/21/copy copy material from existing project
+        // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
 
-    //   //get projectID
-    //   cy.url().then((text) => {
-    //     //get project id
-    //     const array = text.split('/')
-    //     const projectID = array[array.length - 1]
-    //     //save material properties inside project
-    //     // cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
-    //     //after saving FE will try to re-query the page
-    //     // cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
-    //     //api/v1/material/project delete route
-    //     // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
-    //     // api/v1/material/project/21/copy copy material from existing project
-    //     // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
+      })
+            //go to material tab of that project
+            cy.get('div[role="tablist"] > a[data-test-id="exteriors"]').click()
+            it('add new exteriors', () => {
 
-    //   })
-    //         //go to material tab of that project
-    //         cy.get('div[role="tablist"] > a[data-test-id="interiors"]').click()
-    // })
+            })
 
-    // it('', () => {
+            it('delete existing exteriors', () => {
 
-    // })
+            })
+    })
 
+    })
     // })
 
     // context('share', () => {
