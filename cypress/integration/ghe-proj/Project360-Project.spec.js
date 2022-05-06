@@ -9,7 +9,7 @@ describe('project360 - project tab functionalities', () => {
       cy.logInAsAdmin()
     })
 
-    it.skip('add new', () => {
+    it('add new', () => {
       //navigate to project
       cy.navigateTo('project')
       //click add new
@@ -18,7 +18,7 @@ describe('project360 - project tab functionalities', () => {
       cy.isProjectProperties('disabled')
     })
 
-    it.skip('creates new project with details', () => {
+    it('creates new project with details', () => {
       //fill in required field
       cy.insertRequiredFieldForAddnew('project-number', 'project-name')
       //click reset
@@ -47,7 +47,7 @@ describe('project360 - project tab functionalities', () => {
       cy.isProjectProperties('enabled')
     })
 
-    context.skip('material', () => {
+    context('material', () => {
       beforeEach('set up api endpoint listener', () => {
 
         //get projectID
@@ -172,142 +172,19 @@ describe('project360 - project tab functionalities', () => {
     })
 
     context('interior', () => {
-      beforeEach('set up api endpoint listener', () => {
+      beforeEach('set up api endpoint listener', () => cy.setUpListener('interior'))
 
-        //get projectID
-        cy.url().then((text) => {
-          //get project id
-          const array = text.split('/')
-          const projectID = array[array.length - 1]
-          cy.log(`projectID = ${projectID}`)
-          //save new interior properties inside project
-          cy.intercept('POST', `/api/v1/interiorview/project/${projectID}`).as('saveAsNewInterior')
-          //after saving FE will try to re-query the page
-          // cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
-          //api/v1/material/project delete route
-          // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
-          // api/v1/material/project/21/copy copy material from existing project
-          // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
-          //delete an interior at /api/v1/interiorview
-          cy.intercept('DELETE', `/api/v1/interiorview`).as('deleteInterior')
-          //upload api
-          cy.intercept('POST', `/api/v1/interiorview/upload`).as('uploadAPI')
-          //re-query the page
-          cy.intercept('GET', `/api/v1/interiorview?p=0&projectId=${projectID}&ps=10`).as('refreshPage')
-        })
-        //go to material tab of that project
-        cy.get('div[role="tablist"] > a[data-test-id="interiors"]').click()
-      })
-      it('add new interior', function () {
-        const typeARandomName = 'auto-typed new interior'
-        //add new
-        cy.get('button').contains('Add new').click()
-        //random name
-        cy.get('input[name="name"]').type(typeARandomName)
-        //save
-        cy.get('button[data-test-id="saveBtn"]').click()
-        //assert api
-        cy.wait('@saveAsNewInterior').its('response.statusCode').should('be.oneOf', [200])
-        //press escape
-        cy.get('body').type('{esc}');
-        //wait /api/v1/interiorview?p=0&projectId=22&ps=10
-        cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
-        //need to optimize
-        cy.wait(2000)
-        //assert span Not uploaded image yet
-        cy.get('tr[data-test-id="row"]').last().within(() => {
-          //get the span INSIDE the row
-          cy.get('span').contains('Not uploaded image yet').should('exist')
-          //click modify
-          cy.get('button[data-test-id="actMod"]').click()
-        })
-
-        //assert the interior name
-        cy.get('input[name="name"]').invoke('val').should('eq', typeARandomName)
-        //button upload
-        cy.fixture('/images/example.jpg', {
-          encoding: 'binary'
-        }).as('uploadImg')
-        cy.get('input[type="file"]')
-          .selectFile('@uploadImg', {
-            force: true
-          })
-        //button contain ok
-        cy.get('button').contains('OK').click()
-
-        //wait till close button clickable
-        cy.get('.Button-inherit').contains('Close').as('closeBtn')
-        cy.get('@closeBtn').should('have.attr', 'disabled')
-        cy.get('@closeBtn', {
-          timeout: 5 * 60 * 60000
-        }).should('not.have.attr', 'disabled')
-        cy.get('@closeBtn').click()
-        //assert pop up contain success (msg = Upload success)
-        cy.get('div[role="status"]', {
-          timeout: 10000
-        }).contains('Upload success').should('exist').and('be.visible')
-
-        //assert  api/v1/interiorview/upload 200 until its body contain data.continue = false
-        // cy.wait('@uploadAPI',{timeout: 30000}).then((interception) => {
-        //   const _body = interception.response.body
-        //   // cy.log(_body.data)
-        //   // expect(interception.response.body).prop('data')[2].to.eq(false)
-        //   // interception.response.body.data.continue
-        // })
-        //assert Uploaded file
-        //need to optimize
-        cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
-
-        cy.wait(2000)
-        //assert span Not uploaded image yet
-        cy.get('tr[data-test-id="row"]').last().within(() => {
-          //get the span INSIDE the row
-          cy.get('span').contains('Uploaded file').should('exist').and('be.visible')
-        })
-        //Upload fail
-      })
+      it('add new interior', () => cy.addNew('interior'))
 
 
-      it('delete existing interior', () => {
-        cy.get('button[data-test-id="actDel"]').last().click()
-        cy.get('button').contains('OK').click()
-        //deleteInterior api
-        cy.wait('@deleteInterior').its('response.statusCode').should('be.oneOf', [200])
-        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
-        // cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
-        //Deleted successfully
-        cy.get('div[role="status"]').contains('Deleted successfully').should('exist').and('be.visible')
-      })
+      it('delete existing interior', () => cy.deleteInOrEx('interior'))
     })
 
     context('exterior', () => {      
-      beforeEach('set up api endpoint listener', () => {
-      //get projectID
-      cy.url().then((text) => {
-        //get project id
-        const array = text.split('/')
-        const projectID = array[array.length - 1]
-        //save material properties inside project
-        // cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
-        //after saving FE will try to re-query the page
-        // cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
-        //api/v1/material/project delete route
-        // cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
-        // api/v1/material/project/21/copy copy material from existing project
-        // cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
+      beforeEach('set up api endpoint listener',() => cy.setUpListener('exterior') )
+    it('add new exteriors',() => cy.addNew('exterior'))
 
-      })
-            //go to material tab of that project
-            cy.get('div[role="tablist"] > a[data-test-id="exteriors"]').click()
-            it('add new exteriors', () => {
-
-            })
-
-            it('delete existing exteriors', () => {
-
-            })
-    })
-
+    it('delete existing exteriors',() => cy.deleteInOrEx('exterior'))
     })
     // })
 
@@ -388,5 +265,6 @@ describe('project360 - project tab functionalities', () => {
 
     //   })
     // })
+
   })
 })
