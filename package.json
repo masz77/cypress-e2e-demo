@@ -3,7 +3,8 @@
     "open": "npx cypress open",
     "run": "npx cypress run",
     "run-chrome": "cypress run --browser chrome",
-    "run-firefox": "cypress run --browser firefox"
+    "run-firefox": "cypress run --browser firefox",
+    "run-edge": "cypress run --browser edge"
   },
   "devDependencies": {
     "cypress": "^9.5.4",
