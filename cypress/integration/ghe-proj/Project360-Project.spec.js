@@ -9,7 +9,7 @@ describe('project360 - project tab functionalities', () => {
       cy.logInAsAdmin()
     })
 
-    it('add new', () => {
+    it.skip('add new', () => {
       //navigate to project
       cy.navigateTo('project')
       //click add new
@@ -18,7 +18,7 @@ describe('project360 - project tab functionalities', () => {
       cy.isProjectProperties('disabled')
     })
 
-    it('creates new project with details', () => {
+    it.skip('creates new project with details', () => {
       //fill in required field
       cy.insertRequiredFieldForAddnew('project-number', 'project-name')
       //click reset
@@ -47,7 +47,7 @@ describe('project360 - project tab functionalities', () => {
       cy.isProjectProperties('enabled')
     })
 
-    context('material', () => {
+    context.skip('material', () => {
       beforeEach('set up api endpoint listener', () => {
 
         //get projectID

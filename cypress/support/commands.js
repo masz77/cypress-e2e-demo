@@ -26,7 +26,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 //add new func in interior or exterior
-Cypress.Commands.add('addNew', function addNew(InteriorOrExterior) {
+Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     const typeARandomName = `auto-typed new ${InteriorOrExterior}`
     //add new
     cy.get('button').contains('Add new').click()
@@ -52,12 +52,13 @@ Cypress.Commands.add('addNew', function addNew(InteriorOrExterior) {
     //assert the interior name
     cy.get('input[name="name"]').invoke('val').should('eq', typeARandomName)
     //button upload
-    cy.fixture('/images/example.jpg', {
-      encoding: 'binary'
+    cy.fixture(`/images/${InteriorOrExterior}-example.jpg`, {
+      encoding: null
     }).as('uploadImg')
     cy.get('input[type="file"]')
       .selectFile('@uploadImg', {
-        force: true
+        force: true,
+        // encoding: 'binary',
       })
     //button contain ok
     cy.get('button').contains('OK').click()
