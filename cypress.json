@@ -8,11 +8,13 @@
         "charts": true,
         "reportPageTitle": "Ghe Project Suite",
         "embeddedScreenshots": true,
-        "inlineAssets": true      
+        "inlineAssets": true,
+        "html": true,
+        "json": false
   },
     "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
     "experimentalStudio": true,
     "screenshotOnRunFailure": false,
-    "viewportWidth": 1920,
-    "viewportHeight": 1080
+    "viewportWidth": 1280,
+    "viewportHeight": 720
 }
