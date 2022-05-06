@@ -8,7 +8,9 @@
         "charts": true,
         "reportPageTitle": "Ghe Project Suite",
         "embeddedScreenshots": true,
-        "inlineAssets": true      
+        "inlineAssets": true,
+        "html": true,
+        "json": false
   },
     "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
     "experimentalStudio": true,
