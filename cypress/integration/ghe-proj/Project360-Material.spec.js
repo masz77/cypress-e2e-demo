@@ -15,9 +15,15 @@ describe('project360 - material tab functionalities', () => {
       it('navigate to material -> add new material', () => {
 
         //log in and assert
-        cy.visit(Cypress.config().baseUrl)
+        cy.visit(Cypress.config().baseUrl, {
+          onBeforeLoad (win) {
+            Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
+              value: 'en'
+            })
+          }})
         cy.logInCmd('admin', 'admin').type('{enter}')
         cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+        cy.changeLangToEng()
 
         //navigate to project
         cy.get('a[href="/admin/material"]').click()

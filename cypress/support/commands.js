@@ -158,11 +158,22 @@ Cypress.Commands.add('navigateTo', (page) => {
     // },
 )
 
+Cypress.Commands.add('changeLangToEng', () => {
+    cy.get('button[type="button"] img').click()
+    cy.get('div[role="button"]').contains('English').click()
+})
+
 Cypress.Commands.add('logInAsAdmin', () => {
     cy.visit(Cypress.config().baseUrl, {
-        timeout: 20000
-    }).its('navigator.language') // yields window.navigator.language
-    .should('equal', 'en-US') // asserts the expected value
+        onBeforeLoad (win) {
+          Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
+            value: 'en'
+          })
+        },
+        timeout: 20000    
+    })
+    // .its('navigator.language') // yields window.navigator.language
+    // .should('equal', 'en-US') // asserts the expected value
     cy.logInCmd('admin', 'admin').type('{enter}')
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 })

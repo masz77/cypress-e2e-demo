@@ -10,16 +10,22 @@ describe('log in / change password / log out', () => {
 
     context('log in successfully and log out', () => {
         beforeEach('visit the main page', () => {
-            cy.visit(Cypress.config().baseUrl)
+            cy.visit(Cypress.config().baseUrl, {
+                onBeforeLoad (win) {
+                  Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
+                    value: 'en'
+                  })
+                }})
         })
 
         it('1/ has correct username/password -> expect: log in successfully', () => {
             cy.logInCmd('admin', 'admin')
-            cy.get('button[data-test-id="signInBtn"]').contains('OK').click()
+            cy.get('button[data-test-id="signInBtn"]').click()
 
             cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [200])
             //verify url
             cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+            cy.changeLangToEng()
         })
 
         it('2/ has correct username/password -> expect: log in successfully', () => {
@@ -27,6 +33,8 @@ describe('log in / change password / log out', () => {
             cy.logInCmd('admin', 'admin').type('{enter}')
             //verify url
             cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+    cy.changeLangToEng()
+
         })
 
         afterEach('log out and assert', () => {
@@ -43,6 +51,8 @@ describe('log in / change password / log out', () => {
             cy.logInCmd(test1_id, test1_oldPwd).type('{enter}')
             //verify url
             cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+    cy.changeLangToEng()
+
             //change password fail
             cy.changePassword(test1_id, '1', '1')
             // cy.intercept('POST', 'api/v1/user/profile').as('changePasswordStatus')
@@ -73,6 +83,8 @@ describe('log in / change password / log out', () => {
             cy.logInCmd(test1_id, test1_newPwd).type('{enter}')
             //verify url
             cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+    cy.changeLangToEng()
+
             cy.changePassword(test1_id, test1_newPwd, test1_oldPwd)
             cy.log('old password: ', test1_newPwd)
             cy.log('new password: ', test1_oldPwd)
@@ -92,7 +104,12 @@ describe('log in / change password / log out', () => {
 
     context('log in unsuccessfully', () => {
         beforeEach('visit the main page', () => {
-            cy.visit(Cypress.config().baseUrl)
+            cy.visit(Cypress.config().baseUrl, {
+                onBeforeLoad (win) {
+                  Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
+                    value: 'en'
+                  })
+                }})
         })
         it('has wrong username -> expect: error message', () => {
             cy.logInCmd('admin123', 'admin').type('{enter}')
