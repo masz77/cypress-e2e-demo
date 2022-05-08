@@ -6,7 +6,7 @@ describe('project360 - material tab functionalities', () => {
         cy.intercept('POST', '/api/v1/material').as('matSaveStatus')
         cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
         //on failed event - ignore failed
-        // cy.on('fail', (e) => {
+        // cy.on('fail', (e) => {changeLangToEng
         //   console.error(e)
         // })
     })
@@ -23,7 +23,7 @@ describe('project360 - material tab functionalities', () => {
           }})
         cy.logInCmd('admin', 'admin').type('{enter}')
         cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
-        cy.changeLangToEng()
+        // cy.changeLangToEng()
 
         //navigate to project
         cy.get('a[href="/admin/material"]').click()

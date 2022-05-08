@@ -25,6 +25,51 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+Cypress.Commands.add('changePasswordToOldPassword', function changePasswordToOldPassword(test_id, test_oldPwd, test_newPwd) {
+    cy.logInCmd(test_id, test_newPwd).type('{enter}')
+    //verify url
+    cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+
+    cy.changePassword(test_id, test_newPwd, test_oldPwd)
+    // cy.log('old password: ', test1_newPwd)
+    // cy.log('new password: ', test1_oldPwd)
+    //press save
+    cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
+    //assert api & pop up
+    cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [200])
+    //close pro5 panel
+    // cy.get('button',{timeout: 20000}).contains('Close').should('be.visible').should('be.enabled').click()
+    cy.get('body').type('{esc}')
+    cy.get('[data-test-id="accSettings"]').should('be.visible')
+    cy.logOutCmd()
+})
+
+Cypress.Commands.add('changePasswordToNewPassword', function changePasswordToNewPassword(test_id, test_oldPwd, test_newPwd) {
+    ///log in -> change password from CURRENT to NEW -> log out
+    //log in
+    cy.logInCmd(test_id, test_oldPwd).type('{enter}')
+    //verify url
+    cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
+    //change password fail
+    cy.changePassword(test_id, '1', '1')
+    // cy.intercept('POST', 'api/v1/user/profile').as('changePasswordStatus')
+    cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
+    cy.wait('@changePasswordStatus',).its('response.statusCode').should('be.oneOf', [500])
+    cy.get('div[role="status"]').should('contain', 'Wrong')
+    cy.get('body').type('{esc}')
+    cy.changePassword(test_id, test_oldPwd, test_newPwd)
+    //press save
+    cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
+    //assert api & pop up
+    cy.wait('@changePasswordStatus').its('response.statusCode').should('be.oneOf', [200])
+    cy.get('div[role="status"]').should('contain', 'success')
+    //close pro5 panel
+    // cy.get('button',{timeout: 20000}).contains('Close').should('be.enabled').click()
+    cy.get('body').type('{esc}')
+    cy.get('[data-test-id="accSettings"]').should('be.visible')
+    cy.logOutCmd()
+})
+
 //add new func in interior or exterior
 Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     const typeARandomName = `auto-typed new ${InteriorOrExterior}`
@@ -44,34 +89,34 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     cy.wait(2000)
     //assert span Not uploaded image yet
     cy.get('tr[data-test-id="row"]').last().within(() => {
-      //get the span INSIDE the row
-      cy.get('span').contains('Not uploaded image yet').should('exist')
-      //click modify
-      cy.get('button[data-test-id="actMod"]').click()
+        //get the span INSIDE the row
+        cy.get('span').contains('Not uploaded image yet').should('exist')
+        //click modify
+        cy.get('button[data-test-id="actMod"]').click()
     })
     //assert the interior name
     cy.get('input[name="name"]').invoke('val').should('eq', typeARandomName)
     //button upload
     cy.fixture(`/images/${InteriorOrExterior}-example.jpg`, {
-      encoding: null
+        encoding: null
     }).as('uploadImg')
     cy.get('input[type="file"]')
-      .selectFile('@uploadImg', {
-        force: true,
-        // encoding: 'binary',
-      })
+        .selectFile('@uploadImg', {
+            force: true,
+            // encoding: 'binary',
+        })
     //button contain ok
     cy.get('button').contains('OK').click()
     //wait till close button clickable
     cy.get('.Button-inherit').contains('Close').as('closeBtn')
     cy.get('@closeBtn').should('have.attr', 'disabled')
     cy.get('@closeBtn', {
-      timeout: 5 * 60 * 60000
+        timeout: 5 * 60 * 60000
     }).should('not.have.attr', 'disabled')
     cy.get('@closeBtn').click()
     //assert pop up contain success (msg = Upload success)
     cy.get('div[role="status"]', {
-      timeout: 10000
+        timeout: 10000
     }).contains('Upload success').should('exist').and('be.visible')
     //assert  api/v1/interiorview/upload 200 until its body contain data.continue = false
     // cy.wait('@uploadAPI',{timeout: 30000}).then((interception) => {
@@ -86,15 +131,15 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     cy.wait(2000)
     //assert span Not uploaded image yet
     cy.get('tr[data-test-id="row"]').last().within(() => {
-      //get the span INSIDE the row
-      cy.get('span').contains('Uploaded file').should('exist').and('be.visible')
+        //get the span INSIDE the row
+        cy.get('span').contains('Uploaded file').should('exist').and('be.visible')
     })
     //Upload fail
-  })
+})
 
 //delete func in interior or exterior
-Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx){
-    cy.url().should('contain',InOrEx)
+Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx) {
+    cy.url().should('contain', InOrEx)
     cy.get('button[data-test-id="actDel"]').last().click()
     cy.get('button').contains('OK').click()
     //deleteInterior api
@@ -103,27 +148,27 @@ Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx){
     cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
     //Deleted successfully
     cy.get('div[role="status"]').contains('Deleted successfully').should('exist').and('be.visible')
-  })
+})
 //set up before each in interior or exterior
-Cypress.Commands.add('setUpListener',function setUpListener(inOrEx){
+Cypress.Commands.add('setUpListener', function setUpListener(inOrEx) {
     //get projectID
     cy.url().then((text) => {
-      //get project id
-      const array = text.split('/')
-      const projectID = array[array.length - 1]
-      cy.log(`projectID = ${projectID}`)
-      //save new interior properties inside project
-      cy.intercept('POST', `/api/v1/${inOrEx}view/project/${projectID}`).as('saveAsNew')
-      //delete an interior at /api/v1/interiorview
-      cy.intercept('DELETE', `/api/v1/${inOrEx}view`).as('delete')
-      //upload api
-      cy.intercept('POST', `/api/v1/${inOrEx}view/upload`).as('uploadAPI')
-      //re-query the page
-      cy.intercept('GET', `/api/v1/${inOrEx}view?p=0&projectId=${projectID}&ps=10`).as('refreshPage')
+        //get project id
+        const array = text.split('/')
+        const projectID = array[array.length - 1]
+        cy.log(`projectID = ${projectID}`)
+        //save new interior properties inside project
+        cy.intercept('POST', `/api/v1/${inOrEx}view/project/${projectID}`).as('saveAsNew')
+        //delete an interior at /api/v1/interiorview
+        cy.intercept('DELETE', `/api/v1/${inOrEx}view`).as('delete')
+        //upload api
+        cy.intercept('POST', `/api/v1/${inOrEx}view/upload`).as('uploadAPI')
+        //re-query the page
+        cy.intercept('GET', `/api/v1/${inOrEx}view?p=0&projectId=${projectID}&ps=10`).as('refreshPage')
     })
     //go to material tab of that project
     cy.get(`div[role="tablist"] > a[data-test-id="${inOrEx}s"]`).click()
-  })
+})
 
 
 Cypress.Commands.add('clickAddNewButton', () => {
@@ -132,17 +177,19 @@ Cypress.Commands.add('clickAddNewButton', () => {
 
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
-    try {
-        if(page == 'project' ||page == 'material' ||page == 'project-status') {
-            cy.get(`a[href="/admin/${page}"]`).click({force: true})
-            cy.url().should('contain', `admin/${page}`)
-        } else {
-            cy.log ('Allowed value are: project, material, project-status')
-        } 
-    } catch (error) {
-        cy.log ('Allowed value are: project, material, project-status')
+        try {
+            if (page == 'project' || page == 'material' || page == 'project-status') {
+                cy.get(`a[href="/admin/${page}"]`).click({
+                    force: true
+                })
+                cy.url().should('contain', `admin/${page}`)
+            } else {
+                cy.log('Allowed value are: project, material, project-status')
+            }
+        } catch (error) {
+            cy.log('Allowed value are: project, material, project-status')
+        }
     }
-}
 
     // function project() {
     //     cy.get('a[href="/admin/project"]').click()
@@ -164,17 +211,12 @@ Cypress.Commands.add('changeLangToEng', () => {
 })
 
 Cypress.Commands.add('logInAsAdmin', () => {
-    cy.visit(Cypress.config().baseUrl, {
-        onBeforeLoad (win) {
-          Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
-            value: 'en'
-          })
-        },
-        timeout: 20000    
-    })
+    cy.visitTheMainPage()
     // .its('navigator.language') // yields window.navigator.language
     // .should('equal', 'en-US') // asserts the expected value
-    cy.logInCmd('admin', 'admin').type('{enter}')
+    cy.logInCmd('admin', 'admin')
+    // .type('{enter}')
+    cy.get('button[data-test-id="signInBtn"]').click()
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 })
 
@@ -195,8 +237,8 @@ Cypress.Commands.add('fillInDetail', (number, name, brand) => {
 // })
 
 Cypress.Commands.add('isProjectProperties', (expected) => {
-    
-    const _selector = ['material','interiors','exteriors','sharing','legal']
+
+    const _selector = ['material', 'interiors', 'exteriors', 'sharing', 'legal']
     try {
         if (expected == 'disabled') {
             for (let i = 0; i < _selector.length; i++) {
@@ -227,7 +269,15 @@ Cypress.Commands.add('isProjectPropertiesEnabled', () => {
 
     }
 })
-
+Cypress.Commands.add('visitTheMainPage', () => {
+    cy.visit(Cypress.config().baseUrl, {
+        onBeforeLoad(win) {
+            Object.defineProperty(win.localStorage, 'B2S_SOLUTION_LANGUAGE_CODE', {
+                value: 'en'
+            })
+        }
+    })
+})
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
     cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
