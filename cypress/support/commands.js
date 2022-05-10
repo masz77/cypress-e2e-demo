@@ -24,8 +24,22 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('addUser', () => {
 
-Cypress.Commands.add('changePasswordToOldPassword', function changePasswordToOldPassword(test_id, test_oldPwd, test_newPwd) {
+cy.fixture('newUser.json').then(function (newUser) {
+    const _name = Object.keys(newUser[0])
+
+    for (let i = 0; i < newUser.length; i++) {
+        const _user = newUser[i];
+        for (let j = 0; j < _name.length; j++) {
+            cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+        }
+    }
+    //press save
+    cy.get('button[data-test-id="saveBtn"]').click()
+})
+})
+Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
     cy.logInCmd(test_id, test_newPwd).type('{enter}')
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
@@ -36,7 +50,9 @@ Cypress.Commands.add('changePasswordToOldPassword', function changePasswordToOld
     //press save
     cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
     //assert api & pop up
-    cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@logInStatus').then((_interception) => {
+        expect(_interception.response.statusCode).to.eq(200)
+    })
     //close pro5 panel
     // cy.get('button',{timeout: 20000}).contains('Close').should('be.visible').should('be.enabled').click()
     cy.get('body').type('{esc}')
@@ -44,7 +60,7 @@ Cypress.Commands.add('changePasswordToOldPassword', function changePasswordToOld
     cy.logOutCmd()
 })
 
-Cypress.Commands.add('changePasswordToNewPassword', function changePasswordToNewPassword(test_id, test_oldPwd, test_newPwd) {
+Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldPwd, test_newPwd) {
     ///log in -> change password from CURRENT to NEW -> log out
     //log in
     cy.logInCmd(test_id, test_oldPwd).type('{enter}')
@@ -54,20 +70,32 @@ Cypress.Commands.add('changePasswordToNewPassword', function changePasswordToNew
     cy.changePassword(test_id, '1', '1')
     // cy.intercept('POST', 'api/v1/user/profile').as('changePasswordStatus')
     cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
-    cy.wait('@changePasswordStatus',).its('response.statusCode').should('be.oneOf', [500])
+    // cy.wait('@changePasswordStatus',).its('response.statusCode').should('be.oneOf', [500])
+    cy.wait(2000)
+    cy.wait('@changePasswordStatus').then((_interception) => {
+        expect(_interception.response.statusCode).to.eq(500)
+    })
     cy.get('div[role="status"]').should('contain', 'Wrong')
     cy.get('body').type('{esc}')
     cy.changePassword(test_id, test_oldPwd, test_newPwd)
     //press save
     cy.get('button[data-test-id="saveBtn"]').should('be.visible').click()
     //assert api & pop up
-    cy.wait('@changePasswordStatus').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@changePasswordStatus').then((_interception) => {
+        expect(_interception.response.statusCode).to.eq(200)
+    })
     cy.get('div[role="status"]').should('contain', 'success')
     //close pro5 panel
     // cy.get('button',{timeout: 20000}).contains('Close').should('be.enabled').click()
     cy.get('body').type('{esc}')
     cy.get('[data-test-id="accSettings"]').should('be.visible')
     cy.logOutCmd()
+})
+
+//return a random number in the range from 1 to max
+Cypress.Commands.add('random', (max) => {
+    const rndInt = Math.floor(Math.random() * max) + 1
+    return rndInt
 })
 
 //add new func in interior or exterior
@@ -80,11 +108,15 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     //save
     cy.get('button[data-test-id="saveBtn"]').click()
     //assert api
-    cy.wait('@saveAsNew').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@saveAsNew').then(({response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
     //press escape
     cy.get('body').type('{esc}');
     //wait /api/v1/interiorview?p=0&projectId=22&ps=10
-    cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@refreshPage').then(({response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
     //need to optimize
     cy.wait(2000)
     //assert span Not uploaded image yet
@@ -127,7 +159,9 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     // })
     //assert Uploaded file
     //need to optimize
-    cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@refreshPage').then(({response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
     cy.wait(2000)
     //assert span Not uploaded image yet
     cy.get('tr[data-test-id="row"]').last().within(() => {
@@ -143,9 +177,13 @@ Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx) {
     cy.get('button[data-test-id="actDel"]').last().click()
     cy.get('button').contains('OK').click()
     //deleteInterior api
-    cy.wait('@delete').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@delete').then(({response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
     // then Re-Querying The Page -> expect to have this or we'll have a query loop
-    cy.wait('@refreshPage').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@refreshPage').then(({response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
     //Deleted successfully
     cy.get('div[role="status"]').contains('Deleted successfully').should('exist').and('be.visible')
 })
@@ -178,14 +216,20 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
         try {
-            if (page == 'project' || page == 'material' || page == 'project-status') {
-                cy.get(`a[href="/admin/${page}"]`).click({
-                    force: true
-                })
-                cy.url().should('contain', `admin/${page}`)
-            } else {
-                cy.log('Allowed value are: project, material, project-status')
+            const _page = ['project','material','project-status','user']
+            for (let i = 0; i < _page.length; i++) {
+                const _e = _page[i];
+                if (page == _e) {
+                    cy.get(`a[href="/admin/${page}"]`).click({
+                        force: true
+                    })
+                    cy.url().should('contain', `admin/${page}`)
+                    break
+                } else {
+                    cy.log('Allowed value are: project, material, project-status')
+                }
             }
+
         } catch (error) {
             cy.log('Allowed value are: project, material, project-status')
         }
@@ -309,3 +353,5 @@ Cypress.Commands.add('insertRequiredFieldForAddnew', (projNumber, projName) => {
     cy.get('input[name="number"]').type(projNumber)
     cy.get('input[name="name"]').type(projName)
 })
+
+//add update alias

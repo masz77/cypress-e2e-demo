@@ -1,10 +1,5 @@
 [
   {
-    "userName": "admin",
-    "currentPassword": "admin",
-    "newPassword": "admin"
-  },
-  {
     "userName": "b2s.test1",
     "currentPassword": "12345678",
     "newPassword": "newp@ssw0rd1@34%6"
