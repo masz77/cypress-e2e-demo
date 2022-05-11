@@ -12,7 +12,6 @@
         "html": true,
         "json": false
   },
-    "selectorPriority": ["data-test-id","data-testid","id", "class", "attributes"],
     "experimentalStudio": true,
     "screenshotOnRunFailure": false,
     "viewportWidth": 1280,
