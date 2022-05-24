@@ -4,7 +4,8 @@
     "run": "npx cypress run",
     "run-chrome": "cypress run --browser chrome",
     "run-firefox": "cypress run --browser firefox",
-    "run-edge": "cypress run --browser edge"
+    "run-edge": "cypress run --browser edge",
+    "updateDevDependencies": "npm i -g npm-check-updates && ncu -u && npm install"
   },
   "devDependencies": {
     "cypress": "^9.6.1",
