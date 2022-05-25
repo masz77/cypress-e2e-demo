@@ -14,43 +14,18 @@ describe('sign up and role', () => {
     cy.intercept('DELETE', 'api/v1/user').as('deleteUser')
 
     // cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
-    //on failed event - ignore failed
-    // cy.on('fail', (e) => {changeLangToEng
-    //   console.error(e)
-    // })
   })
 
-  context('creates new account and approve', () => {
-    before('',() => {
-            //create reusable var
-            const _randomAccountNumber = Math.floor(Math.random() * 10000)
-            // const accountName = [`moi gioi ${_randomAccountNumber}`, `vp cong chung ${_randomAccountNumber}`]
-            
-            cy.wrap(`username${_randomAccountNumber}`).as('accountName')
-            cy.wrap(`321ewq;\'`).as('password')
-            // const password = '321ewq;\''
-            // const phone = Math.floor(Math.random() * 1000000000)
-            cy.wrap(Math.floor(Math.random() * 1000000000)).as('phone')
-            cy.wrap(`username${_randomAccountNumber}`).as('userName')
-            // let userName = `username${_randomAccountNumber}`
+  context('agency account', () => {
+    before('setting up account', () => {
+      cy.setUpNewAccount()
     })
-    it('create agency account', function()  {
-      //test
-      cy.get('[href="/sign-up"]').click();
-      cy.url().should('contain', '/sign-up')
-      cy.get('[data-test-id="name"]').clear().type(this.accountName);
-      cy.get('[data-test-id="phone"]').clear().type(this.phone); //10 number
-      cy.get('[data-test-id="email"]').clear().type('e@g.c');
-      cy.get('[data-test-id="userName"]').clear().type(this.userName);
-      cy.get('[data-test-id="password"]').clear().type(this.password);
-      cy.get('[data-test-id="repeat_password"]').clear().type(this.password);
-      cy.get('input[type="radio"]').then(($list) => {
-        $list.eq(0).click() //or Notary office = 1 or Agency = 0
-      })
+    it('create agency account', function () {
       //add listener to search bar
       // cy.intercept('GET', `/api/v1/requestuser?p=0&ps=10&s=${accountName}`).as('searchQuery')
 
-      cy.get('[data-test-id="signInBtn"]').click();
+      //fill in data and type of reg, 0 for agency | 1 for notary
+      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 0)
       //if user exist, generate another random user name
       cy.wait('@createUser').then((interception) => {
         try {
@@ -65,60 +40,147 @@ describe('sign up and role', () => {
           assert.equal(interception.response.statusCode, 200)
         }
       })
-      
-      //modify button
-      // cy.get('button[data-test-id="actMod"]').last().click()
-
-      // cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
-      // cy.get('[x1="6"]').click();
-      // cy.get('[x2="19"]').click();
-      // cy.get('').should('have.text', 'Rejected');
-      // cy.get('').should('have.text', 'Approved');
     })
-    it('can log in to created account and create new project, then delete it', function()  {
+    it('can log in to created account and create new project, then delete it', function () {
       cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
 
-      cy.logInCmd(this.userName,this.password)
+      cy.logInCmd(this.userName, this.password)
       cy.get('[data-test-id="signInBtn"]').click();
-      cy.createNewProject(`new project name of ${this.userName}`,`new project number of ${this.userName}`)
+      cy.createNewProject(`new project name of ${this.userName}`, `new project number of ${this.userName}`)
       //navigate to project
       cy.navigateTo('project')
       cy.searchFor(this.userName)
-      cy.get('button[data-test-id="actDel"]').last().click()///api/v1/realestateproject
+      cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
       cy.get('button').contains('OK').click()
       cy.wait('@deleteProject').then((interception) => {
-          assert.equal(interception.response.statusCode, 200)
+        assert.equal(interception.response.statusCode, 200)
       })
       cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
 
     })
+    it('check for account duplication', function () {
+      //fill in data and type of reg, 0 for agency | 1 for notary
+      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 0)
+      //if user exist, generate another random user name
+      cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 500)
+      })
+    })
 
-    it('can delete user', function()  {
-    //approve or reject with notary office account
-    cy.logInAsAdmin()
-    cy.get('a[href="/admin/user"]').click({force: true});
-    cy.url().should('contain', '/admin/user')
-    //search for account name
-    cy.searchFor(this.accountName)
-    // cy.get('div[data-test-id="searchDiv"]').click().then (() =>{
-    //   cy.get('input[name="search"]').type(this.accountName)
-    // })
-    // cy.wait(2000)
-    // //improvement
-    // // cy.wait('@searchQuery').then((interception) => {
-    // //     assert.equal(interception.response.statusCode, 200)
-    // // })
-    // cy.get('tr > td').invoke('text')
-    // .then((text)=>{
-    //   const divTxt = text;
-    //   expect(divTxt).to.contain(this.accountName);
-    // })
-    
-    cy.get('button[data-test-id="actDel"]').last().click()
-    cy.get('button').contains('OK').click()
-    cy.wait('@deleteUser').then((interception) => {
+    it('can delete agency user', function () {
+      //approve or reject with notary office account
+      cy.logInAsAdmin()
+      cy.get('a[href="/admin/user"]').click({
+        force: true
+      });
+      cy.url().should('contain', '/admin/user')
+      //search for account name
+      cy.searchFor(this.accountName)
+
+      cy.get('button[data-test-id="actDel"]').last().click()
+      cy.get('button').contains('OK').click()
+      cy.wait('@deleteUser').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
+      })
     })
   })
-})
+
+  context.only('notary office account for approval', () => {
+    before('setting up account', () => {
+      cy.setUpNewAccount()
+    })
+    it.only('can create agency user for approval', function () {
+      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+      cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+      })
+      cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+    })
+
+    it.only('log in as admin and approve', function () {
+      cy.logInAsAdmin()
+      cy.navigateTo('request-user')
+      cy.searchFor(this.accountName)
+
+      //modify button
+      cy.get('button[data-test-id="actMod"]').last().click()
+
+      cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
+      //approveNewUser
+      cy.wait('@approveNewUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+      })
+      cy.get('span').contains('Approved').should('exist'); //Rejected
+
+
+    })
+
+    it('check in user if user have been created yet', function () {
+      cy.logInAsAdmin()
+      //check in user if user have been created yet
+      cy.navigateTo('user')
+      cy.searchFor(this.accountName)
+    })
+
+    it('check for duplication', function () {
+      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+      cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+      })
+      cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+      //log in as admin and approve
+      cy.logInAsAdmin()
+      cy.navigateTo('request-user')
+      cy.searchFor(this.accountName)
+
+      //modify button
+      cy.get('button[data-test-id="actMod"]').last().click()
+
+      cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
+      //approveNewUser
+      cy.wait('@approveNewUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 500)
+      })
+      cy.get('div[role="status"]').contains('existing').should('exist').and('be.visible')
+      cy.get('[data-test-id="rejectBtn"]').click(); //data-test-id="rejectBtn"
+      //rejectNewUser
+      cy.wait('@rejectNewUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+      })
+    })
+
+    it('log in as notary office and verify logic in legal support', function () {
+
+    })
+
+    it('delete notary office account', function () {
+
+    })
+  })
+
+  context('notary office account for denial', () => {
+    before('setting up account', () => {
+      cy.setUpNewAccount()
+    })
+
+    it('can create agency user for denial', function () {
+      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+      cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+      })
+      cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+    })
+
+    it('log in as admin and deny', function () {
+
+    })
+
+    it('verifies the account is not created in user tab', function () {
+
+    })
+
+    it('try log in with the denied account', function () {
+
+    })
+  })
 })
