@@ -24,20 +24,61 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('searchFor', function(searchText)  { 
+//search for account name
+cy.get('div[data-test-id="searchDiv"]').click().then (() =>{
+    cy.get('input[name="search"]').type(searchText)
+  })
+  cy.wait(1000)
+  //improvement
+  // cy.wait('@searchQuery').then((interception) => {
+  //     assert.equal(interception.response.statusCode, 200)
+  // })
+  cy.get('tr > td').invoke('text')
+  .then((text)=>{
+    const divTxt = text;
+    expect(divTxt).to.contain(searchText);
+  })
+})
+
+Cypress.Commands.add('createNewProject', function(projectName,projectNumber)  { 
+    //navigate to project
+    cy.navigateTo('project')
+    //click add new
+    cy.clickAddNewButton()
+    cy.url().should('contain', 'admin/project/new')
+    cy.isProjectProperties('disabled')
+    //fill in required field
+    cy.insertRequiredFieldForAddnew(projectNumber, projectName)
+    //click reset
+    cy.get('button[data-test-id="reset"]').click()
+    cy.get('input[name="number"]').should('be.empty')
+    cy.get('input[name="name"]').should('be.empty')
+
+    cy.insertRequiredFieldForAddnew(projectNumber, projectName)
+    //start listen at api/v1/realestateproject
+    cy.intercept('POST', 'api/v1/realestateproject').as('addNewProject')
+    cy.get('button[data-test-id="saveBtn"]').click()
+    cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+    cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
+    //assert material, in/exteriors are disabled on newly added project
+    cy.isProjectProperties('enabled')
+})
+
 Cypress.Commands.add('addUser', () => {
 
-cy.fixture('newUser.json').then(function (newUser) {
-    const _name = Object.keys(newUser[0])
+    cy.fixture('newUser.json').then(function (newUser) {
+        const _name = Object.keys(newUser[0])
 
-    for (let i = 0; i < newUser.length; i++) {
-        const _user = newUser[i];
-        for (let j = 0; j < _name.length; j++) {
-            cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+        for (let i = 0; i < newUser.length; i++) {
+            const _user = newUser[i];
+            for (let j = 0; j < _name.length; j++) {
+                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+            }
         }
-    }
-    //press save
-    cy.get('button[data-test-id="saveBtn"]').click()
-})
+        //press save
+        cy.get('button[data-test-id="saveBtn"]').click()
+    })
 })
 Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
     cy.logInCmd(test_id, test_newPwd).type('{enter}')
@@ -108,13 +149,17 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     //save
     cy.get('button[data-test-id="saveBtn"]').click()
     //assert api
-    cy.wait('@saveAsNew').then(({response}) => {
+    cy.wait('@saveAsNew').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //press escape
     cy.get('body').type('{esc}');
     //wait /api/v1/interiorview?p=0&projectId=22&ps=10
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //need to optimize
@@ -159,7 +204,9 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     // })
     //assert Uploaded file
     //need to optimize
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     cy.wait(2000)
@@ -177,11 +224,15 @@ Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx) {
     cy.get('button[data-test-id="actDel"]').last().click()
     cy.get('button').contains('OK').click()
     //deleteInterior api
-    cy.wait('@delete').then(({response}) => {
+    cy.wait('@delete').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     // then Re-Querying The Page -> expect to have this or we'll have a query loop
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //Deleted successfully
@@ -216,7 +267,7 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
         try {
-            const _page = ['project','material','project-status','user']
+            const _page = ['project', 'material', 'project-status', 'user']
             for (let i = 0; i < _page.length; i++) {
                 const _e = _page[i];
                 if (page == _e) {

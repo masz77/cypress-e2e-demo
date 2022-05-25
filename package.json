@@ -5,10 +5,10 @@
     "run-chrome": "cypress run --browser chrome",
     "run-firefox": "cypress run --browser firefox",
     "run-edge": "cypress run --browser edge",
-    "updateDevDependencies": "npm i -g npm-check-updates && ncu -u && npm install"
+    "updateToLatestDevDependencies": "npm i -g npm-check-updates && ncu -u && npm install"
   },
   "devDependencies": {
-    "cypress": "^9.6.1",
-    "cypress-mochawesome-reporter": "^3.0.1"
+    "cypress": "^9.7.0",
+    "cypress-mochawesome-reporter": "^3.1.0"
   }
 }
