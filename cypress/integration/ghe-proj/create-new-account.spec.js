@@ -141,6 +141,9 @@ describe('sign up and role', () => {
         // cy.logInCmd(this.userName, this.password)
         cy.logInCmd('username2600', `321ewq;'`)
         cy.get('[data-test-id="signInBtn"]').click();
+        ///api/v1/legalsupport/update-document
+        cy.intercept('POST', '/api/v1/legalsupport/update-document').as('updateDocument')
+
       })
       it.only('create new legal support', function () {
         cy.navigateTo('legal-support')
@@ -162,21 +165,69 @@ describe('sign up and role', () => {
             .click()
         })
         //name
-        const _randomNumber = Math.floor(Math.random() * 10000)
+        const _randomNumber = Math.floor(Math.random() * 1000000000)
         cy.get('input[name="customerName"]').type(`customerName${_randomNumber}`)
         cy.get('input[name="customerIdentity"]').type(_randomNumber)
         cy.get('input[name="customerGender"]')
         cy.get('input[name="customerJob"]').type('customerJob')
         cy.get('input[name="customerPhone"]').type(_randomNumber)
-        let _rndInt = Math.floor(Math.random() * 99) + 1
+        let _rndInt = Math.floor(Math.random() * 63) + 1
 
         cy.get('input[name="customerAddressId"]').parent().click().then(() => {
           cy.get(`[data-value="${_rndInt}"]`).click();
         })
-        
-        cy.get('input[name="customerMaritalStatus"]').parent().click().then(() => {
-          cy.get('[data-value="2"]').click();//single = 1, married = 2, widow = 3 4
-        })
+
+        for (let _i = 1; _i <= 4; _i++) {
+          cy.get('input[name="customerMaritalStatus"]').parent().click().then(() => {
+            cy.get(`[data-value="${_i}"]`).click(); //single = 1, married = 2, widow = 3 4
+          })
+          cy.get('[data-test-id="saveBtn"]').first().click();
+
+          cy.get('input[type="radio"]').each(function ($el, index, $list) {
+            cy.wrap($el).check()
+            switch (index + 1) {
+              case 1:
+                // code block
+                if (_i == 2) {
+                  cy.get('input[type="checkbox"]').should('have.length', 4).each(function ($el, index, $list) {
+                    cy.wrap($el).check()
+                    cy.wrap($el).should('be.checked')
+                    cy.get('[data-test-id="saveBtn"]').last().click();
+                    cy.wait('@updateDocument').then((interception) => {
+                      assert.equal(interception.response.statusCode, 200)
+                    })
+                  })
+                } else {
+                  // cy.get('input[type="checkbox"]').should('have.length', 3).each(function ($el, index, $list) {
+                  //   cy.wrap($el).check()
+                  //   cy.wrap($el).should('be.checked')
+                  // })
+                }
+                break;
+              case 2:
+                // code block
+                // cy.get('input[type="checkbox"]').should('have.length', 7).each(function ($el, index, $list) {
+                //   cy.wrap($el).check()
+                //   cy.wrap($el).should('be.checked')
+                // })
+                break;
+              case 3:
+                // code block
+                // cy.get('input[type="checkbox"]').should('have.length', 6).each(function ($el, index, $list) {
+                //   cy.wrap($el).check()
+                //   cy.wrap($el).should('be.checked')
+                // })
+                break;
+              case 4:
+                // code block
+                // cy.get('input[type="checkbox"]').should('have.length', 7).each(function ($el, index, $list) {
+                //   cy.wrap($el).check()
+                //   cy.wrap($el).should('be.checked')
+                // })
+                break;
+            }
+          })
+        }
       })
 
       it('delete legal support', function () {
