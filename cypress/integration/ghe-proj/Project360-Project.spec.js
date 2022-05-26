@@ -3,13 +3,12 @@
 
 describe('project360 - project tab functionalities', () => {
 
-  context('creates new project with details', () => {
-
-
+  context('creates new project without details', () => {
     it('creates new project without details', () => {
       // //log in and assert
       cy.logInAsAdmin()
-      cy.createNewProject()
+      const _randomAccountNumber = Math.floor(Math.random() * 10000)
+      cy.createNewProject(`projectNumber${_randomAccountNumber}`, `projectName${_randomAccountNumber}`)
     })
   })
 

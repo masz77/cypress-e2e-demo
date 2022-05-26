@@ -1,29 +1,18 @@
 /// <reference types="cypress" />
 
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('deleteUserByAccountName', function (accountName) {
+    cy.logInAsAdmin()
+    //check in user if user have been created yet
+    cy.navigateTo('user')
+    cy.searchFor(accountName)
+    //click last delete button
+    cy.get('button[data-test-id="actDel"]').last().click()
+    //confirm
+    cy.get('button').contains('OK').click()
+    cy.wait('@deleteUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+})
 
 Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
     //create reusable var
@@ -34,43 +23,43 @@ Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
     cy.wrap(`username${_randomAccountNumber}`).as('userName')
 })
 
-Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName, password, mode)  { 
-//test
-cy.get('[href="/sign-up"]').click();
-cy.url().should('contain', '/sign-up')
-cy.get('[data-test-id="name"]').clear().type(accountName);
-cy.get('[data-test-id="phone"]').clear().type(phone); //10 number
-cy.get('[data-test-id="email"]').clear().type('e@g.c');
-cy.get('[data-test-id="userName"]').clear().type(userName);
-cy.get('[data-test-id="password"]').clear().type(password);
-cy.get('[data-test-id="repeat_password"]').clear().type(password);
-cy.get('input[type="radio"]').then(($list) => {
-  $list.eq(mode).click() //or Notary office = 1 or Agency = 0
-})
-cy.get('[data-test-id="signInBtn"]').click();
-})
-
-Cypress.Commands.add('isExistInRow', function(searchText)  { 
-cy.get('tr > td').invoke('text')
-.then((text)=>{
-  const divTxt = text;
-  expect(divTxt).to.contain(searchText);
-})
-})
-Cypress.Commands.add('searchFor', function(searchText)  { 
-//search for account name
-cy.get('div[data-test-id="searchDiv"]').click().then (() =>{
-    cy.get('input[name="search"]').type(searchText)
-  })
-  cy.wait(1000)
-  //improvement
-  // cy.wait('@searchQuery').then((interception) => {
-  //     assert.equal(interception.response.statusCode, 200)
-  // })
-  cy.isExistInRow(searchText)
+Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName, password, mode) {
+    //test
+    cy.get('[href="/sign-up"]').click();
+    cy.url().should('contain', '/sign-up')
+    cy.get('[data-test-id="name"]').clear().type(accountName);
+    cy.get('[data-test-id="phone"]').clear().type(phone); //10 number
+    cy.get('[data-test-id="email"]').clear().type('e@g.c');
+    cy.get('[data-test-id="userName"]').clear().type(userName);
+    cy.get('[data-test-id="password"]').clear().type(password);
+    cy.get('[data-test-id="repeat_password"]').clear().type(password);
+    cy.get('input[type="radio"]').then(($list) => {
+        $list.eq(mode).click() //or Notary office = 1 or Agency = 0
+    })
+    cy.get('[data-test-id="signInBtn"]').click();
 })
 
-Cypress.Commands.add('createNewProject', function(projectName,projectNumber)  { 
+Cypress.Commands.add('isExistInRow', function (searchText) {
+    cy.get('tr > td').invoke('text')
+        .then((text) => {
+            const divTxt = text;
+            expect(divTxt).to.contain(searchText);
+        })
+})
+Cypress.Commands.add('searchFor', function (searchText) {
+    //search for account name
+    cy.get('div[data-test-id="searchDiv"]').click().then(() => {
+        cy.get('input[name="search"]').type(searchText)
+    })
+    cy.wait(1500)
+    //improvement
+    // cy.wait('@searchQuery').then((interception) => {
+    //     assert.equal(interception.response.statusCode, 200)
+    // })
+    cy.isExistInRow(searchText)
+})
+
+Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     //navigate to project
     cy.navigateTo('project')
     //click add new
@@ -296,7 +285,7 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
         try {
-            const _page = ['project', 'material', 'project-status', 'user','request-user']
+            const _page = ['project', 'material', 'project-status', 'user', 'request-user','legal-support','legal-support-common']
             for (let i = 0; i < _page.length; i++) {
                 const _e = _page[i];
                 if (page == _e) {
@@ -306,12 +295,12 @@ Cypress.Commands.add('navigateTo', (page) => {
                     cy.url().should('contain', `admin/${page}`)
                     break
                 } else {
-                    cy.log('Allowed value are: project, material, project-status')
+                    // cy.log('Allowed value are: project, material, project-status')
                 }
             }
 
         } catch (error) {
-            cy.log('Allowed value are: project, material, project-status')
+            // cy.log('Allowed value are: project, material, project-status')
         }
     }
 

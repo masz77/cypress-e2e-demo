@@ -43,7 +43,6 @@ describe('sign up and role', () => {
     })
     it('can log in to created account and create new project, then delete it', function () {
       cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
-
       cy.logInCmd(this.userName, this.password)
       cy.get('[data-test-id="signInBtn"]').click();
       cy.createNewProject(`new project name of ${this.userName}`, `new project number of ${this.userName}`)
@@ -68,20 +67,7 @@ describe('sign up and role', () => {
     })
 
     it('can delete agency user', function () {
-      //approve or reject with notary office account
-      cy.logInAsAdmin()
-      cy.get('a[href="/admin/user"]').click({
-        force: true
-      });
-      cy.url().should('contain', '/admin/user')
-      //search for account name
-      cy.searchFor(this.accountName)
-
-      cy.get('button[data-test-id="actDel"]').last().click()
-      cy.get('button').contains('OK').click()
-      cy.wait('@deleteUser').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-      })
+      cy.deleteUserByAccountName(this.accountName)
     })
   })
 
@@ -89,7 +75,8 @@ describe('sign up and role', () => {
     before('setting up account', () => {
       cy.setUpNewAccount()
     })
-    it.only('can create agency user for approval', function () {
+
+    it('can create agency user for approval', function () {
       cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
       cy.wait('@createUser').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
@@ -97,7 +84,7 @@ describe('sign up and role', () => {
       cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
     })
 
-    it.only('log in as admin and approve', function () {
+    it('log in as admin and approve', function () {
       cy.logInAsAdmin()
       cy.navigateTo('request-user')
       cy.searchFor(this.accountName)
@@ -149,12 +136,57 @@ describe('sign up and role', () => {
       })
     })
 
-    it('log in as notary office and verify logic in legal support', function () {
+    context.only('notary office account for approval', () => {
+      beforeEach('log in as notary office', () => {
+        // cy.logInCmd(this.userName, this.password)
+        cy.logInCmd('username2600', `321ewq;'`)
+        cy.get('[data-test-id="signInBtn"]').click();
+      })
+      it.only('create new legal support', function () {
+        cy.navigateTo('legal-support')
+        cy.clickAddNewButton()
+        cy.url().should('contain', 'legal-support/new')
+        //assert required field
+        cy.get('button[data-test-id="saveBtn"]').click()
+        cy.get('input[aria-invalid="true"]').should('have.length', 4)
+        cy.get('p').contains(`Field 'Customer address' is required`).should('exist')
 
+        //select last project
+        cy.get('[data-testid="ArrowDropDownIcon"]').then(($list) => {
+          cy.wrap($list.eq(0)).click({
+            force: true
+          })
+          cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
+            .should('be.visible')
+            .last()
+            .click()
+        })
+        //name
+        const _randomNumber = Math.floor(Math.random() * 10000)
+        cy.get('input[name="customerName"]').type(`customerName${_randomNumber}`)
+        cy.get('input[name="customerIdentity"]').type(_randomNumber)
+        cy.get('input[name="customerGender"]')
+        cy.get('input[name="customerJob"]').type('customerJob')
+        cy.get('input[name="customerPhone"]').type(_randomNumber)
+        let _rndInt = Math.floor(Math.random() * 99) + 1
+
+        cy.get('input[name="customerAddressId"]').parent().click().then(() => {
+          cy.get(`[data-value="${_rndInt}"]`).click();
+        })
+        
+        cy.get('input[name="customerMaritalStatus"]').parent().click().then(() => {
+          cy.get('[data-value="2"]').click();//single = 1, married = 2, widow = 3 4
+        })
+      })
+
+      it('delete legal support', function () {
+        cy.navigateTo('legal-support')
+      })
     })
 
-    it('delete notary office account', function () {
 
+    it('delete notary office account', function () {
+      cy.deleteUserByAccountName(this.accountName)
     })
   })
 
