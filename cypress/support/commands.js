@@ -1,5 +1,50 @@
 /// <reference types="cypress" />
 
+Cypress.Commands.add('approveNotaryOfficeAccount', function (_isApproved) {
+    cy.logInAsAdmin()
+    cy.navigateTo('request-user')
+    cy.searchFor(this.accountName)
+
+    //modify button
+    cy.get('button[data-test-id="actMod"]').last().click()
+    if (_isApproved == true) {
+        cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
+        //approveNewUser
+        cy.wait('@approveNewUser').then((interception) => {
+            assert.equal(interception.response.statusCode, 200)
+        })
+        cy.get('span').contains('Approved').should('exist'); //Rejected
+
+    } else if (_isApproved == false) {
+        cy.get('[data-test-id="rejectBtn"]').click(); //data-test-id="rejectBtn"
+        //approveNewUser
+        cy.wait('@rejectNewUser').then((interception) => {
+            assert.equal(interception.response.statusCode, 200)
+        })
+        cy.get('span').contains('Rejected').should('exist'); //Rejected
+
+    }
+})
+
+Cypress.Commands.add('createNotaryOfficeUser', function () {
+
+    cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+    cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+    cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+})
+
+Cypress.Commands.add('checkBoxShouldHaveLength', function lengthCheck(_numberOfCheckBox) {
+    cy.get('input[type="checkbox"]').should('have.length', _numberOfCheckBox).each(function ($el, index, $list) {
+        cy.wrap($el).check()
+        cy.wrap($el).should('be.checked')
+    })
+    cy.get('[data-test-id="saveBtn"]').last().click();
+    cy.wait('@updateDocument').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+})
 Cypress.Commands.add('deleteUserByAccountName', function (accountName) {
     cy.logInAsAdmin()
     //check in user if user have been created yet
@@ -39,12 +84,20 @@ Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName,
     cy.get('[data-test-id="signInBtn"]').click();
 })
 
-Cypress.Commands.add('isExistInRow', function (searchText) {
-    cy.get('tr > td').invoke('text')
+Cypress.Commands.add('isExistInRow', function (searchText,_isExist) {
+    if (_isExist == true) {
+        cy.get('tr > td').invoke('text')
+            .then((text) => {
+                const divTxt = text;
+                expect(divTxt).to.contain(searchText);
+            })        
+    } else if (_isExist == false){
+        cy.get('tr > td').invoke('text')
         .then((text) => {
             const divTxt = text;
-            expect(divTxt).to.contain(searchText);
-        })
+            expect(divTxt).to.contain('No match');
+        }) 
+    }
 })
 Cypress.Commands.add('searchFor', function (searchText) {
     //search for account name
@@ -56,7 +109,6 @@ Cypress.Commands.add('searchFor', function (searchText) {
     // cy.wait('@searchQuery').then((interception) => {
     //     assert.equal(interception.response.statusCode, 200)
     // })
-    cy.isExistInRow(searchText)
 })
 
 Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
@@ -285,7 +337,7 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
         try {
-            const _page = ['project', 'material', 'project-status', 'user', 'request-user','legal-support','legal-support-common']
+            const _page = ['project', 'material', 'project-status', 'user', 'request-user', 'legal-support', 'legal-support-common']
             for (let i = 0; i < _page.length; i++) {
                 const _e = _page[i];
                 if (page == _e) {

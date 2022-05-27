@@ -49,6 +49,8 @@ describe('sign up and role', () => {
       //navigate to project
       cy.navigateTo('project')
       cy.searchFor(this.userName)
+      cy.isExistInRow(this.userName,true)
+
       cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
       cy.get('button').contains('OK').click()
       cy.wait('@deleteProject').then((interception) => {
@@ -71,35 +73,17 @@ describe('sign up and role', () => {
     })
   })
 
-  context.only('notary office account for approval', () => {
+  context('notary office account for approval', () => {
     before('setting up account', () => {
       cy.setUpNewAccount()
     })
 
-    it('can create agency user for approval', function () {
-      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
-      cy.wait('@createUser').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-      })
-      cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+    it('can create notary office user for approval', function () {
+      cy.createNotaryOfficeUser()
     })
 
     it('log in as admin and approve', function () {
-      cy.logInAsAdmin()
-      cy.navigateTo('request-user')
-      cy.searchFor(this.accountName)
-
-      //modify button
-      cy.get('button[data-test-id="actMod"]').last().click()
-
-      cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
-      //approveNewUser
-      cy.wait('@approveNewUser').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-      })
-      cy.get('span').contains('Approved').should('exist'); //Rejected
-
-
+      cy.approveNotaryOfficeAccount(true)
     })
 
     it('check in user if user have been created yet', function () {
@@ -107,6 +91,7 @@ describe('sign up and role', () => {
       //check in user if user have been created yet
       cy.navigateTo('user')
       cy.searchFor(this.accountName)
+      cy.isExistInRow(this.accountName,true)
     })
 
     it('check for duplication', function () {
@@ -119,6 +104,7 @@ describe('sign up and role', () => {
       cy.logInAsAdmin()
       cy.navigateTo('request-user')
       cy.searchFor(this.accountName)
+      cy.isExistInRow(this.accountName,true)
 
       //modify button
       cy.get('button[data-test-id="actMod"]').last().click()
@@ -136,16 +122,17 @@ describe('sign up and role', () => {
       })
     })
 
-    context.only('notary office account for approval', () => {
-      beforeEach('log in as notary office', () => {
-        // cy.logInCmd(this.userName, this.password)
-        cy.logInCmd('username2600', `321ewq;'`)
+    context('log in by notary office account and check for legal support logic', () => {
+      beforeEach('log in as notary office', function()  {
+        cy.logInCmd(this.userName, this.password)
+        // cy.logInCmd('username2600', `321ewq;'`)
         cy.get('[data-test-id="signInBtn"]').click();
         ///api/v1/legalsupport/update-document
         cy.intercept('POST', '/api/v1/legalsupport/update-document').as('updateDocument')
 
       })
-      it.only('create new legal support', function () {
+
+      it('create new legal support and check for creation logic', function () {
         cy.navigateTo('legal-support')
         cy.clickAddNewButton()
         cy.url().should('contain', 'legal-support/new')
@@ -189,41 +176,19 @@ describe('sign up and role', () => {
               case 1:
                 // code block
                 if (_i == 2) {
-                  cy.get('input[type="checkbox"]').should('have.length', 4).each(function ($el, index, $list) {
-                    cy.wrap($el).check()
-                    cy.wrap($el).should('be.checked')
-                    cy.get('[data-test-id="saveBtn"]').last().click();
-                    cy.wait('@updateDocument').then((interception) => {
-                      assert.equal(interception.response.statusCode, 200)
-                    })
-                  })
+                  cy.checkBoxShouldHaveLength(4)
                 } else {
-                  // cy.get('input[type="checkbox"]').should('have.length', 3).each(function ($el, index, $list) {
-                  //   cy.wrap($el).check()
-                  //   cy.wrap($el).should('be.checked')
-                  // })
+                  cy.checkBoxShouldHaveLength(3)
                 }
                 break;
               case 2:
-                // code block
-                // cy.get('input[type="checkbox"]').should('have.length', 7).each(function ($el, index, $list) {
-                //   cy.wrap($el).check()
-                //   cy.wrap($el).should('be.checked')
-                // })
+                cy.checkBoxShouldHaveLength(7)
                 break;
               case 3:
-                // code block
-                // cy.get('input[type="checkbox"]').should('have.length', 6).each(function ($el, index, $list) {
-                //   cy.wrap($el).check()
-                //   cy.wrap($el).should('be.checked')
-                // })
+                cy.checkBoxShouldHaveLength(6)
                 break;
               case 4:
-                // code block
-                // cy.get('input[type="checkbox"]').should('have.length', 7).each(function ($el, index, $list) {
-                //   cy.wrap($el).check()
-                //   cy.wrap($el).should('be.checked')
-                // })
+                cy.checkBoxShouldHaveLength(7)
                 break;
             }
           })
@@ -233,11 +198,10 @@ describe('sign up and role', () => {
       it('delete legal support', function () {
         cy.navigateTo('legal-support')
       })
-    })
 
-
-    it('delete notary office account', function () {
-      cy.deleteUserByAccountName(this.accountName)
+      it('delete notary office account', function () {
+        cy.deleteUserByAccountName(this.accountName)
+      })
     })
   })
 
@@ -247,22 +211,26 @@ describe('sign up and role', () => {
     })
 
     it('can create agency user for denial', function () {
-      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
-      cy.wait('@createUser').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-      })
-      cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+      cy.createNotaryOfficeUser()
     })
 
     it('log in as admin and deny', function () {
-
+      cy.approveNotaryOfficeAccount(false)
     })
 
     it('verifies the account is not created in user tab', function () {
-
+      cy.logInAsAdmin()
+      //check in user if user have been created yet
+      cy.navigateTo('user')
+      cy.searchFor(this.accountName)
+      cy.isExistInRow(this.accountName,false)
     })
 
     it('try log in with the denied account', function () {
+      cy.intercept('POST', '/api/v1/user/login').as('logInStatus')
+      cy.logInCmd(this.userName, this.password)
+      cy.get('[data-test-id="signInBtn"]').click();
+      cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [500])
 
     })
   })
