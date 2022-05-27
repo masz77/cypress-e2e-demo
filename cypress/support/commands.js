@@ -1,43 +1,154 @@
 /// <reference types="cypress" />
 
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('approveNotaryOfficeAccount', function (_isApproved) {
+    cy.logInAsAdmin()
+    cy.navigateTo('request-user')
+    cy.searchFor(this.accountName)
+
+    //modify button
+    cy.get('button[data-test-id="actMod"]').last().click()
+    if (_isApproved == true) {
+        cy.get('[data-test-id="approveBtn"]').click(); //data-test-id="rejectBtn"
+        //approveNewUser
+        cy.wait('@approveNewUser').then((interception) => {
+            assert.equal(interception.response.statusCode, 200)
+        })
+        cy.get('span').contains('Approved').should('exist'); //Rejected
+
+    } else if (_isApproved == false) {
+        cy.get('[data-test-id="rejectBtn"]').click(); //data-test-id="rejectBtn"
+        //approveNewUser
+        cy.wait('@rejectNewUser').then((interception) => {
+            assert.equal(interception.response.statusCode, 200)
+        })
+        cy.get('span').contains('Rejected').should('exist'); //Rejected
+
+    }
+})
+
+Cypress.Commands.add('createNotaryOfficeUser', function () {
+
+    cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+    cy.wait('@createUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+    cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
+})
+
+Cypress.Commands.add('checkBoxShouldHaveLength', function lengthCheck(_numberOfCheckBox) {
+    cy.get('input[type="checkbox"]').should('have.length', _numberOfCheckBox).each(function ($el, index, $list) {
+        cy.wrap($el).check()
+        cy.wrap($el).should('be.checked')
+    })
+    cy.get('[data-test-id="saveBtn"]').last().click();
+    cy.wait('@updateDocument').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+})
+Cypress.Commands.add('deleteUserByAccountName', function (accountName) {
+    cy.logInAsAdmin()
+    //check in user if user have been created yet
+    cy.navigateTo('user')
+    cy.searchFor(accountName)
+    //click last delete button
+    cy.get('button[data-test-id="actDel"]').last().click()
+    //confirm
+    cy.get('button').contains('OK').click()
+    cy.wait('@deleteUser').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+})
+
+Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
+    //create reusable var
+    const _randomAccountNumber = Math.floor(Math.random() * 10000)
+    cy.wrap(`username${_randomAccountNumber}`).as('accountName')
+    cy.wrap(`321ewq;\'`).as('password')
+    cy.wrap(Math.floor(Math.random() * 1000000000)).as('phone')
+    cy.wrap(`username${_randomAccountNumber}`).as('userName')
+})
+
+Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName, password, mode) {
+    //test
+    cy.get('[href="/sign-up"]').click();
+    cy.url().should('contain', '/sign-up')
+    cy.get('[data-test-id="name"]').clear().type(accountName);
+    cy.get('[data-test-id="phone"]').clear().type(phone); //10 number
+    cy.get('[data-test-id="email"]').clear().type('e@g.c');
+    cy.get('[data-test-id="userName"]').clear().type(userName);
+    cy.get('[data-test-id="password"]').clear().type(password);
+    cy.get('[data-test-id="repeat_password"]').clear().type(password);
+    cy.get('input[type="radio"]').then(($list) => {
+        $list.eq(mode).click() //or Notary office = 1 or Agency = 0
+    })
+    cy.get('[data-test-id="signInBtn"]').click();
+})
+
+Cypress.Commands.add('isExistInRow', function (searchText,_isExist) {
+    if (_isExist == true) {
+        cy.get('tr > td').invoke('text')
+            .then((text) => {
+                const divTxt = text;
+                expect(divTxt).to.contain(searchText);
+            })        
+    } else if (_isExist == false){
+        cy.get('tr > td').invoke('text')
+        .then((text) => {
+            const divTxt = text;
+            expect(divTxt).to.contain('No match');
+        }) 
+    }
+})
+Cypress.Commands.add('searchFor', function (searchText) {
+    //search for account name
+    cy.get('div[data-test-id="searchDiv"]').click().then(() => {
+        cy.get('input[name="search"]').type(searchText)
+    })
+    cy.wait(1500)
+    //improvement
+    // cy.wait('@searchQuery').then((interception) => {
+    //     assert.equal(interception.response.statusCode, 200)
+    // })
+})
+
+Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
+    //navigate to project
+    cy.navigateTo('project')
+    //click add new
+    cy.clickAddNewButton()
+    cy.url().should('contain', 'admin/project/new')
+    cy.isProjectProperties('disabled')
+    //fill in required field
+    cy.insertRequiredFieldForAddnew(projectNumber, projectName)
+    //click reset
+    cy.get('button[data-test-id="reset"]').click()
+    cy.get('input[name="number"]').should('be.empty')
+    cy.get('input[name="name"]').should('be.empty')
+
+    cy.insertRequiredFieldForAddnew(projectNumber, projectName)
+    //start listen at api/v1/realestateproject
+    cy.intercept('POST', 'api/v1/realestateproject').as('addNewProject')
+    cy.get('button[data-test-id="saveBtn"]').click()
+    cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+    cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
+    //assert material, in/exteriors are disabled on newly added project
+    cy.isProjectProperties('enabled')
+})
+
 Cypress.Commands.add('addUser', () => {
 
-cy.fixture('newUser.json').then(function (newUser) {
-    const _name = Object.keys(newUser[0])
+    cy.fixture('newUser.json').then(function (newUser) {
+        const _name = Object.keys(newUser[0])
 
-    for (let i = 0; i < newUser.length; i++) {
-        const _user = newUser[i];
-        for (let j = 0; j < _name.length; j++) {
-            cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+        for (let i = 0; i < newUser.length; i++) {
+            const _user = newUser[i];
+            for (let j = 0; j < _name.length; j++) {
+                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+            }
         }
-    }
-    //press save
-    cy.get('button[data-test-id="saveBtn"]').click()
-})
+        //press save
+        cy.get('button[data-test-id="saveBtn"]').click()
+    })
 })
 Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
     cy.logInCmd(test_id, test_newPwd).type('{enter}')
@@ -108,13 +219,17 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     //save
     cy.get('button[data-test-id="saveBtn"]').click()
     //assert api
-    cy.wait('@saveAsNew').then(({response}) => {
+    cy.wait('@saveAsNew').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //press escape
     cy.get('body').type('{esc}');
     //wait /api/v1/interiorview?p=0&projectId=22&ps=10
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //need to optimize
@@ -159,7 +274,9 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     // })
     //assert Uploaded file
     //need to optimize
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     cy.wait(2000)
@@ -177,11 +294,15 @@ Cypress.Commands.add('deleteInOrEx', function deleteInOrEx(InOrEx) {
     cy.get('button[data-test-id="actDel"]').last().click()
     cy.get('button').contains('OK').click()
     //deleteInterior api
-    cy.wait('@delete').then(({response}) => {
+    cy.wait('@delete').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     // then Re-Querying The Page -> expect to have this or we'll have a query loop
-    cy.wait('@refreshPage').then(({response}) => {
+    cy.wait('@refreshPage').then(({
+        response
+    }) => {
         expect(response.statusCode).to.eq(200)
     })
     //Deleted successfully
@@ -216,7 +337,7 @@ Cypress.Commands.add('clickAddNewButton', () => {
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
         try {
-            const _page = ['project','material','project-status','user']
+            const _page = ['project', 'material', 'project-status', 'user', 'request-user', 'legal-support', 'legal-support-common']
             for (let i = 0; i < _page.length; i++) {
                 const _e = _page[i];
                 if (page == _e) {
@@ -226,12 +347,12 @@ Cypress.Commands.add('navigateTo', (page) => {
                     cy.url().should('contain', `admin/${page}`)
                     break
                 } else {
-                    cy.log('Allowed value are: project, material, project-status')
+                    // cy.log('Allowed value are: project, material, project-status')
                 }
             }
 
         } catch (error) {
-            cy.log('Allowed value are: project, material, project-status')
+            // cy.log('Allowed value are: project, material, project-status')
         }
     }
 

@@ -1,8 +1,10 @@
 /// <reference types="cypress" />
 // import userData from '../fixtures/account.json'
+
 Cypress.SelectorPlayground.defaults({
     selectorPriority: ["data-test-id", "data-testid", "id", "class", "attributes"],
 })
+
 describe('log in / change password / log out', () => {
     beforeEach('load fixture', () => {
         // cy.visit(Cypress.config().baseUrl)

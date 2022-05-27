@@ -1,13 +1,15 @@
 {
   "scripts": {
     "open": "npx cypress open",
-    "run": "npx cypress run",
+    "run": "cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
     "run-chrome": "cypress run --browser chrome",
     "run-firefox": "cypress run --browser firefox",
-    "run-edge": "cypress run --browser edge"
+    "run-edge": "cypress run --browser edge",
+    "updateToLatestDevDependenciesAtNewPC": "npm i -g npm-check-updates && ncu -u && npm install",
+    "updateToLatestDevDependencies": "ncu -u && npm install"
   },
   "devDependencies": {
-    "cypress": "^9.5.4",
-    "cypress-mochawesome-reporter": "^3.0.1"
+    "cypress": "^9.7.0",
+    "cypress-mochawesome-reporter": "^3.1.0"
   }
 }

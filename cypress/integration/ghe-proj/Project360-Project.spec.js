@@ -3,37 +3,12 @@
 
 describe('project360 - project tab functionalities', () => {
 
-  context('creates new project with details', () => {
-    it('log in', () => {
+  context('creates new project without details', () => {
+    it('creates new project without details', () => {
       // //log in and assert
       cy.logInAsAdmin()
-    })
-
-    it('add new', () => {
-      //navigate to project
-      cy.navigateTo('project')
-      //click add new
-      cy.clickAddNewButton()
-      cy.url().should('contain', 'admin/project/new')
-      cy.isProjectProperties('disabled')
-    })
-
-    it('creates new project with details', () => {
-      //fill in required field
-      cy.insertRequiredFieldForAddnew('project-number', 'project-name')
-      //click reset
-      cy.get('button[data-test-id="reset"]').click()
-      cy.get('input[name="number"]').should('be.empty')
-      cy.get('input[name="name"]').should('be.empty')
-
-      cy.insertRequiredFieldForAddnew('project-number', 'project-name')
-      //start listen at api/v1/realestateproject
-      cy.intercept('POST', 'api/v1/realestateproject').as('addNewProject')
-      cy.get('button[data-test-id="saveBtn"]').click()
-      cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-      cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
-      //assert material, in/exteriors are disabled on newly added project
-      cy.isProjectProperties('enabled')
+      const _randomAccountNumber = Math.floor(Math.random() * 10000)
+      cy.createNewProject(`projectNumber${_randomAccountNumber}`, `projectName${_randomAccountNumber}`)
     })
   })
 
@@ -180,11 +155,11 @@ describe('project360 - project tab functionalities', () => {
       it('delete existing interior', () => cy.deleteInOrEx('interior'))
     })
 
-    context('exterior', () => {      
-      beforeEach('set up api endpoint listener',() => cy.setUpListener('exterior') )
-    it('add new exteriors',() => cy.addNew('exterior'))
+    context('exterior', () => {
+      beforeEach('set up api endpoint listener', () => cy.setUpListener('exterior'))
+      it('add new exteriors', () => cy.addNew('exterior'))
 
-    it('delete existing exteriors',() => cy.deleteInOrEx('exterior'))
+      it('delete existing exteriors', () => cy.deleteInOrEx('exterior'))
     })
     // })
 
