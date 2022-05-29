@@ -54,19 +54,7 @@ describe('project360 - project tab functionalities', () => {
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       })
 
-      it('delete an existing material from current project', () => {
-        //click last delete button
-        cy.get('button[data-test-id="actDel"]').last().click()
-        //confirm
-        cy.get('button').contains('OK').click()
-        // Assertion
-        cy.wait('@deleteMaterialOfAProject').then((interception) => {
-          assert.equal(interception.response.statusCode, 200)
-        })
-        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
-        cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
-        cy.get('div[role="status"]').contains('Deleted successfully!').should('exist').and('be.visible')
-      })
+      it('delete an existing material from current project', () => cy.deleteMaterialFromProjectPage)
 
       it.skip('copy material from other project', () => {
         //more settings button

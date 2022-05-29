@@ -12,8 +12,6 @@ describe('sign up and role', () => {
     cy.intercept('POST', '/api/v1/requestuser/action/Reject').as('rejectNewUser')
     cy.intercept('GET', '/api/v1/requestuser?p=0&ps=10').as('requeryThePage')
     cy.intercept('DELETE', 'api/v1/user').as('deleteUser')
-
-    // cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
   })
 
   context.only('agency account', () => {
@@ -57,8 +55,41 @@ describe('sign up and role', () => {
       cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
 
       cy.addNewMaterialDetails()
+
+      cy.deleteMaterialFromProjectPage()
     })
 
+    it('can modify interior of new project', function () {
+      cy.logInCmd(this.userName, this.password)
+      //navigate to project
+      cy.navigateTo('project')
+      //search for the new created project
+      cy.searchFor(`new project name of ${this.userName}`)
+      //click modify
+      cy.get('button[data-test-id="actMod"]').last().click()
+
+      cy.setUpListener('interior')
+
+      cy.addNew('interior')
+
+      cy.deleteInOrEx('interior')
+    })
+
+    it('can modify exterior of new project', function () {
+      cy.logInCmd(this.userName, this.password)
+      //navigate to project
+      cy.navigateTo('project')
+      //search for the new created project
+      cy.searchFor(`new project name of ${this.userName}`)
+      //click modify
+      cy.get('button[data-test-id="actMod"]').last().click()
+
+      cy.setUpListener('exterior')
+
+      cy.addNew('exterior')
+
+      cy.deleteInOrEx('exterior')
+    })
     it('can delete new project', function () {
       cy.logInCmd(this.userName, this.password)
       cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')

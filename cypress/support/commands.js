@@ -1,5 +1,19 @@
 /// <reference types="cypress" />
 
+Cypress.Commands.add('deleteMaterialFromProjectPage', function () {
+
+    //click last delete button
+    cy.get('button[data-test-id="actDel"]').last().click()
+    //confirm
+    cy.get('button').contains('OK').click()
+    // Assertion
+    cy.wait('@deleteMaterialOfAProject').then((interception) => {
+      assert.equal(interception.response.statusCode, 200)
+    })
+    // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+    cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
+    cy.get('div[role="status"]').contains('Deleted successfully!').should('exist').and('be.visible')
+  })
 
 Cypress.Commands.add('setUpAliasesForMaterialTab', function () {
     //get projectID
@@ -455,8 +469,6 @@ Cypress.Commands.add('logInAsAdmin', () => {
     // .its('navigator.language') // yields window.navigator.language
     // .should('equal', 'en-US') // asserts the expected value
     cy.logInCmd('admin', 'admin')
-    // .type('{enter}')
-    cy.get('button[data-test-id="signInBtn"]').click()
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 })
 
