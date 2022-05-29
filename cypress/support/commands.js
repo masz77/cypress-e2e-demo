@@ -1,5 +1,78 @@
 /// <reference types="cypress" />
 
+
+Cypress.Commands.add('setUpAliasesForMaterialTab', function () {
+    //get projectID
+    cy.url().then((text) => {
+        //get project id
+        const array = text.split('/')
+        const projectID = array[array.length - 1]
+        //save material properties inside project
+        cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
+        //after saving FE will try to re-query the page
+        cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
+        //api/v1/material/project delete route
+        cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
+        // api/v1/material/project/21/copy copy material from existing project
+        cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
+    })
+})
+
+Cypress.Commands.add('addNewMaterialDetails', function () {
+    let dataTest = [null, '69,420']
+    cy.get('button').contains('Add new').click()
+    //click save right away -> should fail
+    cy.get('button[data-test-id="saveBtn"]').click()
+    //assert api res code = 500
+    cy.wait('@modifyingProject').its('response.statusCode').should('be.oneOf', [500])
+    //get the master div contain 7 input tag
+    //loop thru each input tag and type in value
+    cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
+        if (index == 0) {
+            //at 1st element -> dropdown list select
+            cy.wrap($el).click()
+            cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
+                .should('be.visible')
+                .last()
+                .click()
+        } else {
+            //at other element -> type
+            cy.wrap($el).type(dataTest[1])
+        }
+    })
+    //assert data entered
+    cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
+        if (index == 0) {
+            cy.wrap($el).invoke('val').should('not.be.empty')
+        } else {
+            cy.wrap($el).invoke('val').should('eq', dataTest[1])
+            // cy.wrap($el).should('eq',dataTest[1])
+        }
+    })
+    //save
+    cy.get('button[data-test-id="saveBtn"]').click()
+    cy.wait('@modifyingProject').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+    // then Re-Querying The Page -> expect to havve this or we'll have a query loop
+    cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
+    cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
+})
+
+Cypress.Commands.add('deleteProject', function (projectName) {
+    //navigate to project
+    cy.navigateTo('project')
+    cy.searchFor(projectName)
+    cy.isExistInRow(projectName, true)
+
+    cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
+    cy.get('button').contains('OK').click()
+    cy.wait('@deleteProject').then((interception) => {
+        assert.equal(interception.response.statusCode, 200)
+    })
+    cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
+})
+
 Cypress.Commands.add('approveNotaryOfficeAccount', function (_isApproved) {
     cy.logInAsAdmin()
     cy.navigateTo('request-user')
@@ -66,6 +139,8 @@ Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
     cy.wrap(`321ewq;\'`).as('password')
     cy.wrap(Math.floor(Math.random() * 1000000000)).as('phone')
     cy.wrap(`username${_randomAccountNumber}`).as('userName')
+    cy.wrap(`projectNumber${_randomAccountNumber}`).as('projectNumber')
+    cy.wrap(`projectName${_randomAccountNumber}`).as('projectName')
 })
 
 Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName, password, mode) {
@@ -84,19 +159,19 @@ Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName,
     cy.get('[data-test-id="signInBtn"]').click();
 })
 
-Cypress.Commands.add('isExistInRow', function (searchText,_isExist) {
+Cypress.Commands.add('isExistInRow', function (searchText, _isExist) {
     if (_isExist == true) {
         cy.get('tr > td').invoke('text')
             .then((text) => {
                 const divTxt = text;
                 expect(divTxt).to.contain(searchText);
-            })        
-    } else if (_isExist == false){
+            })
+    } else if (_isExist == false) {
         cy.get('tr > td').invoke('text')
-        .then((text) => {
-            const divTxt = text;
-            expect(divTxt).to.contain('No match');
-        }) 
+            .then((text) => {
+                const divTxt = text;
+                expect(divTxt).to.contain('No match');
+            })
     }
 })
 Cypress.Commands.add('searchFor', function (searchText) {
@@ -447,6 +522,7 @@ Cypress.Commands.add('visitTheMainPage', () => {
 Cypress.Commands.add('logInCmd', (userName, password) => {
     cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
     cy.get('[data-test-id="password"]').clear().type(password)
+    cy.get('[data-test-id="signInBtn"]').click();
 })
 
 Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {

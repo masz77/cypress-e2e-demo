@@ -16,7 +16,7 @@ describe('sign up and role', () => {
     // cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
   })
 
-  context('agency account', () => {
+  context.only('agency account', () => {
     before('setting up account', () => {
       cy.setUpNewAccount()
     })
@@ -32,33 +32,39 @@ describe('sign up and role', () => {
           assert.equal(interception.response.statusCode, 200)
         } catch (error) {
           let _anotherRandomAccountNumber = Math.floor(Math.random() * 100)
-          // userName = `username${_anotherRandomAccountNumber}`
           cy.wrap(`username${_anotherRandomAccountNumber}`).as('userName')
-
           cy.get('[data-test-id="userName"]').clear().type(this.userName);
           cy.get('[data-test-id="signInBtn"]').click();
           assert.equal(interception.response.statusCode, 200)
         }
       })
     })
-    it('can log in to created account and create new project, then delete it', function () {
-      cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
+    it('can log in to created account and create new project', function () {
       cy.logInCmd(this.userName, this.password)
-      cy.get('[data-test-id="signInBtn"]').click();
       cy.createNewProject(`new project name of ${this.userName}`, `new project number of ${this.userName}`)
+    })
+        
+    it('can modify material of new project', function () {
+      cy.logInCmd(this.userName, this.password)
       //navigate to project
       cy.navigateTo('project')
-      cy.searchFor(this.userName)
-      cy.isExistInRow(this.userName,true)
+      //search for the new created project
+      cy.searchFor(`new project name of ${this.userName}`)
+      //click modify
+      cy.get('button[data-test-id="actMod"]').last().click()
 
-      cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
-      cy.get('button').contains('OK').click()
-      cy.wait('@deleteProject').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-      })
-      cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
+      cy.setUpAliasesForMaterialTab()
+      cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
 
+      cy.addNewMaterialDetails()
     })
+
+    it('can delete new project', function () {
+      cy.logInCmd(this.userName, this.password)
+      cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
+      cy.deleteProject(this.userName)
+    })
+
     it('check for account duplication', function () {
       //fill in data and type of reg, 0 for agency | 1 for notary
       cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 0)
@@ -125,8 +131,6 @@ describe('sign up and role', () => {
     context('log in by notary office account and check for legal support logic', () => {
       beforeEach('log in as notary office', function()  {
         cy.logInCmd(this.userName, this.password)
-        // cy.logInCmd('username2600', `321ewq;'`)
-        cy.get('[data-test-id="signInBtn"]').click();
         ///api/v1/legalsupport/update-document
         cy.intercept('POST', '/api/v1/legalsupport/update-document').as('updateDocument')
 

@@ -2,13 +2,14 @@
 // import 'cypress-file-upload';
 
 describe('project360 - project tab functionalities', () => {
-
+  before('setting up project props', function () {
+    cy.setUpNewAccount()
+  })
   context('creates new project without details', () => {
-    it('creates new project without details', () => {
+    it('creates new project without details', function () {
       // //log in and assert
       cy.logInAsAdmin()
-      const _randomAccountNumber = Math.floor(Math.random() * 10000)
-      cy.createNewProject(`projectNumber${_randomAccountNumber}`, `projectName${_randomAccountNumber}`)
+      cy.createNewProject(this.projectName, this.projectNumber)
     })
   })
 
@@ -24,65 +25,12 @@ describe('project360 - project tab functionalities', () => {
 
     context('material', () => {
       beforeEach('set up api endpoint listener', () => {
-
-        //get projectID
-        cy.url().then((text) => {
-          //get project id
-          const array = text.split('/')
-          const projectID = array[array.length - 1]
-          //save material properties inside project
-          cy.intercept('POST', `api/v1/material/project/${projectID}`).as('modifyingProject')
-          //after saving FE will try to re-query the page
-          cy.intercept('GET', `api/v1/material/project?p=0&projectId=${projectID}&ps=10`).as('thenReQueryingThePage')
-          //api/v1/material/project delete route
-          cy.intercept('DELETE', `api/v1/material/project`).as('deleteMaterialOfAProject')
-          // api/v1/material/project/21/copy copy material from existing project
-          cy.intercept('POST', `api/v1/material/project/${projectID}/copy`).as('copyMaterialFromOtherProject')
-        })
+        cy.setUpAliasesForMaterialTab()
         //go to material tab of that project
         cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
       })
 
-      it('add new material details', () => {
-        let dataTest = [null, '69,420']
-        cy.get('button').contains('Add new').click()
-        //click save right away -> should fail
-        cy.get('button[data-test-id="saveBtn"]').click()
-        //assert api res code = 500
-        cy.wait('@modifyingProject').its('response.statusCode').should('be.oneOf', [500])
-        //get the master div contain 7 input tag
-        //loop thru each input tag and type in value
-        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
-          if (index == 0) {
-            //at 1st element -> dropdown list select
-            cy.wrap($el).click()
-            cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
-              .should('be.visible')
-              .last()
-              .click()
-          } else {
-            //at other element -> type
-            cy.wrap($el).type(dataTest[1])
-          }
-        })
-        //assert data entered
-        cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
-          if (index == 0) {
-            cy.wrap($el).invoke('val').should('not.be.empty')
-          } else {
-            cy.wrap($el).invoke('val').should('eq', dataTest[1])
-            // cy.wrap($el).should('eq',dataTest[1])
-          }
-        })
-        //save
-        cy.get('button[data-test-id="saveBtn"]').click()
-        cy.wait('@modifyingProject').then((interception) => {
-          assert.equal(interception.response.statusCode, 200)
-        })
-        // then Re-Querying The Page -> expect to havve this or we'll have a query loop
-        cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
-        cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-      })
+      it('add new material details', () => cy.addNewMaterialDetails)
 
       it('modify existing project', () => {
         cy.get('button[data-test-id="actMod"]').last().click()
@@ -120,7 +68,7 @@ describe('project360 - project tab functionalities', () => {
         cy.get('div[role="status"]').contains('Deleted successfully!').should('exist').and('be.visible')
       })
 
-      it('copy material from other project', () => {
+      it.skip('copy material from other project', () => {
         //more settings button
         cy.get('button[data-test-id="matSettings"]').click()
         //copy from other proj button
@@ -241,5 +189,13 @@ describe('project360 - project tab functionalities', () => {
     //   })
     // })
 
+  })
+
+  context('can delete project', () => {
+    it('can delete project', function () {
+      cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
+      cy.logInAsAdmin()
+      cy.deleteProject(this.projectName)
+    })
   })
 })

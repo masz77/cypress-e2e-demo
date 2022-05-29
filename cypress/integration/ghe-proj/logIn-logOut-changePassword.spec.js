@@ -83,19 +83,19 @@ describe('log in / change password / log out', () => {
             cy.visitTheMainPage()
         })
         it('has wrong username -> expect: error message', () => {
-            cy.logInCmd('admin123', 'admin').type('{enter}')
+            cy.logInCmd('admin123', 'admin')
             cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [500])
             cy.get('div[role="status"]').should('contain', 'Login fail!')
         })
 
         it('has wrong password -> expect: error message', () => {
-            cy.logInCmd('admin', 'admin123').type('{enter}')
+            cy.logInCmd('admin', 'admin123')
             cy.wait('@logInStatus').its('response.statusCode').should('be.oneOf', [500])
             cy.get('div[role="status"]').should('contain', 'Login fail!')
         })
     })
 
-    context.only('create new account', () => {
+    context('create new account', () => {
         before('visit the main page and log in as admin', () => {
             cy.visitTheMainPage()
             cy.logInAsAdmin()

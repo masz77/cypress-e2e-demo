@@ -21,7 +21,7 @@ describe('project360 - material tab functionalities', () => {
               value: 'en'
             })
           }})
-        cy.logInCmd('admin', 'admin').type('{enter}')
+        cy.logInCmd('admin', 'admin')
         cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
         // cy.changeLangToEng()
 
