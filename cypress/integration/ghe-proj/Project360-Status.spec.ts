@@ -35,7 +35,7 @@ describe('project360 - status tab functionalities', () => {
     it('reset button', () => {
 
       //try reset button
-      cy.fillInDetail(1, '1', null)
+      cy.fillInDetail('1', '1', null)
       cy.get('button[data-test-id="reset"]').click()
       //assert empty
       cy.get('input[name="number"]').invoke('val').should('be.empty')

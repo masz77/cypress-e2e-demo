@@ -14,11 +14,36 @@ declare namespace Cypress {
         isProjectPropertiesDisabled:() => Cypress.Chainable<JQuery>;
         fillInDetail: (number: string, name: string, brand: string) => Cypress.Chainable<JQuery>;
         logInAsAdmin: () => Cypress.Chainable<JQuery>;
-        // navigateTo: () => Cypress.Chainable<JQuery>;
-        // projectStatus: () => Cypress.Chainable<JQuery>;
-        // project: () => Cypress.Chainable<JQuery>;
-        // material: () => Cypress.Chainable<JQuery>;
         clickAddNewButton: () => Cypress.Chainable<JQuery>;
+        isProjectProperties(expected: string):  Chainable<Element>;
+        visitTheMainPage():  Chainable<Element>;
+        deleteMaterialFromProjectPage():  Chainable<Element>;
+        setUpAliasesForMaterialTab():  Chainable<Element>;
+        addNewMaterialDetails():  Chainable<Element>;
+        createNotaryOfficeUser():  Chainable<Element>;
+        setUpNewAccount():  Chainable<Element>;
+        addUser():  Chainable<Element>;
+        changeLangToEng():  Chainable<Element>;
+        deleteProject(projectName: string):  Chainable<Element>;
+        deleteUserByAccountName(accountName: string):  Chainable<Element>;
+        
+        isExistInRow(searchText: string, _isExist:boolean):  Chainable<Element>;
+        createNewProject(projectName: string, projectNumber:string):  Chainable<Element>;
+        
+        changePasswordToOldPassword(test_id: string, test_oldPwd: string, test_newPwd: string):  Chainable<Element>;
+        changePasswordToNewPassword(test_id: string, test_oldPwd: string, test_newPwd: string):  Chainable<Element>;
+        
+        searchFor(searchText: string):  Chainable<Element>;
+        addNew(InteriorOrExterior: string):  Chainable<Element>;
+        deleteInOrEx(InteriorOrExterior: string):  Chainable<Element>;
+        setUpListener(InteriorOrExterior: string):  Chainable<Element>;
+        navigateTo(page: string):  Chainable<Element>;
+        // random(max: number):  Chainable<Element>;
+        
+        checkBoxShouldHaveLength(_numberOfCheckBox: number):  Chainable<Element>;
+        approveNotaryOfficeAccount(_isApproved: boolean):  Chainable<Element>;
+        
+        signUpFunc(accountName: string, phone: number, userName: string, password: string, mode: number):  Chainable<Element>;
 
         
     }
