@@ -1,19 +1,20 @@
 {
-    "video": false,
-    "defaultCommandTimeout": 15000,
-    "baseUrl": "http://ghe-staging.b2ssolution.com/",
-    "reporter": "cypress-mochawesome-reporter",
-    "reporterOptions": {
-        "reportDir": "cypress/reports",
-        "charts": true,
-        "reportPageTitle": "Ghe Project Suite",
-        "embeddedScreenshots": true,
-        "inlineAssets": true,
-        "html": true,
-        "json": false
+  "video": true,
+  "screenshotOnRunFailure": true,
+  "defaultCommandTimeout": 15000,
+  "baseUrl": "http://ghe-staging.b2ssolution.com/",
+  "reporter": "cypress-mochawesome-reporter",
+  "reporterOptions": {
+    "reportDir": "cypress/reports",
+    "charts": true,
+    "reportPageTitle": "Ghe Project Suite",
+    "embeddedScreenshots": true,
+    "inlineAssets": true,
+    "html": true,
+    "json": false
   },
-    "experimentalStudio": true,
-    "screenshotOnRunFailure": false,
-    "viewportWidth": 1280,
-    "viewportHeight": 720
+  "experimentalStudio": true,
+  "viewportWidth": 1280,
+  "viewportHeight": 720,
+  "projectId": "xbway2"
 }

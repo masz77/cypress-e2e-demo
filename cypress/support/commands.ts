@@ -232,11 +232,16 @@ Cypress.Commands.add('addUser', () => {
         for (let i = 0; i < newUser.length; i++) {
             const _user = newUser[i];
             for (let j = 0; j < _name.length; j++) {
-                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+                cy.get(`input[name="${_name[j]}"]`).clear().type(_user[_name[j]])
             }
+            //press save
+            cy.get('button[data-test-id="saveBtn"]').click()
+            cy.wait('@addNewUser').then((_interception) => {
+                expect(_interception.response.statusCode).to.eq(200)
+            })
+            cy.navigateTo('user')
+            cy.get('a[data-test-id="addNewBtn"]').click()
         }
-        //press save
-        cy.get('button[data-test-id="saveBtn"]').click()
     })
 })
 Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
@@ -263,7 +268,7 @@ Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldP
 Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldPwd, test_newPwd) {
     ///log in -> change password from CURRENT to NEW -> log out
     //log in
-    cy.logInCmd(test_id, test_oldPwd).type('{enter}')
+    cy.logInCmd(test_id, test_oldPwd)
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
     //change password fail
