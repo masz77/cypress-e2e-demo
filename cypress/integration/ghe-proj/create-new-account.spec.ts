@@ -189,10 +189,10 @@ describe('sign up and role', () => {
         //name
         const _randomNumber = Math.floor(Math.random() * 1000000000)
         cy.get('input[name="customerName"]').type(`customerName${_randomNumber}`)
-        cy.get('input[name="customerIdentity"]').type(_randomNumber)
+        cy.get('input[name="customerIdentity"]').type(_randomNumber.toString())
         cy.get('input[name="customerGender"]')
         cy.get('input[name="customerJob"]').type('customerJob')
-        cy.get('input[name="customerPhone"]').type(_randomNumber)
+        cy.get('input[name="customerPhone"]').type(_randomNumber.toString())
         let _rndInt = Math.floor(Math.random() * 63) + 1
 
         cy.get('input[name="customerAddressId"]').parent().click().then(() => {

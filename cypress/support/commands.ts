@@ -122,7 +122,7 @@ Cypress.Commands.add('createNotaryOfficeUser', function () {
     cy.get('div[role="status"]').contains('please wait for approval').should('exist').and('be.visible')
 })
 
-Cypress.Commands.add('checkBoxShouldHaveLength', function lengthCheck(_numberOfCheckBox) {
+Cypress.Commands.add('checkBoxShouldHaveLength', function (_numberOfCheckBox) {
     cy.get('input[type="checkbox"]').should('have.length', _numberOfCheckBox).each(function ($el, index, $list) {
         cy.wrap($el).check()
         cy.wrap($el).should('be.checked')
@@ -146,7 +146,7 @@ Cypress.Commands.add('deleteUserByAccountName', function (accountName) {
     })
 })
 
-Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
+Cypress.Commands.add('setUpNewAccount', function () {
     //create reusable var
     const _randomAccountNumber = Math.floor(Math.random() * 10000)
     cy.wrap(`username${_randomAccountNumber}`).as('accountName')
@@ -157,12 +157,12 @@ Cypress.Commands.add('setUpNewAccount', function setUpAccount() {
     cy.wrap(`projectName${_randomAccountNumber}`).as('projectName')
 })
 
-Cypress.Commands.add('signUpFunc', function signUp(accountName, phone, userName, password, mode) {
+Cypress.Commands.add('signUpFunc', function (accountName, phone, userName, password, mode) {
     //test
     cy.get('[href="/sign-up"]').click();
     cy.url().should('contain', '/sign-up')
     cy.get('[data-test-id="name"]').clear().type(accountName);
-    cy.get('[data-test-id="phone"]').clear().type(phone); //10 number
+    cy.get('[data-test-id="phone"]').clear().type(phone.toString()); //10 number
     cy.get('[data-test-id="email"]').clear().type('e@g.c');
     cy.get('[data-test-id="userName"]').clear().type(userName);
     cy.get('[data-test-id="password"]').clear().type(password);
@@ -293,10 +293,10 @@ Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldP
 })
 
 //return a random number in the range from 1 to max
-Cypress.Commands.add('random', (max) => {
-    const rndInt = Math.floor(Math.random() * max) + 1
-    return rndInt
-})
+// Cypress.Commands.add('random', (max) => {
+//     const rndInt = Math.floor(Math.random() * max) + 1
+//     return rndInt
+// })
 
 //add new func in interior or exterior
 Cypress.Commands.add('addNew', (InteriorOrExterior) => {
@@ -333,9 +333,10 @@ Cypress.Commands.add('addNew', (InteriorOrExterior) => {
     //assert the interior name
     cy.get('input[name="name"]').invoke('val').should('eq', typeARandomName)
     //button upload
-    cy.fixture(`/images/${InteriorOrExterior}-example.jpg`, {
-        encoding: null
-    }).as('uploadImg')
+    // cy.fixture(`/images/${InteriorOrExterior}-example.jpg`, {
+    //     encoding: null
+    // }).as('uploadImg')    
+    cy.fixture(`/images/${InteriorOrExterior}-example.jpg`).as('uploadImg')
     cy.get('input[type="file"]')
         .selectFile('@uploadImg', {
             force: true,
