@@ -9,29 +9,10 @@ pipelines:
   default:
     - parallel:
         - step:
-            name: Build and Test on Chrome
-            runs-on: 
-              - 'self.hosted'
-              - 'windows'
-              - 'customlabel'
+            name: Build and Test
+            caches:
+              - node
             script:
               - npm install
-              - npx cypress run --browser chrome
-        - step:
-            name: Build and Test on Firefox
-            runs-on: 
-              - 'self.hosted'
-              - 'windows'
-              - 'customlabel'
-            script:
-              - npm install
-              - npx cypress run --browser firefox
-        - step:
-            name: Build and Test on MS Edge
-            runs-on: 
-              - 'self.hosted'
-              - 'windows'
-              - 'customlabel'
-            script:
-              - npm install
-              - npx cypress run --browser edge
+              - npm run
+
