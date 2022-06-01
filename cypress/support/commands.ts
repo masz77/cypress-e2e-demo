@@ -219,7 +219,10 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     cy.intercept('POST', 'api/v1/realestateproject').as('addNewProject')
     cy.get('button[data-test-id="saveBtn"]').click()
     cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-    cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@addNewProject').then((_interception) => {
+        // Cypress.env('projectID',_interception.response.body.data.id)
+        expect(_interception.response.statusCode).to.eq(200)
+    })
     //assert material, in/exteriors are disabled on newly added project
     cy.isProjectProperties('enabled')
 })
@@ -245,7 +248,7 @@ Cypress.Commands.add('addUser', () => {
     })
 })
 Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
-    cy.logInCmd(test_id, test_newPwd).type('{enter}')
+    cy.logInCmd(test_id, test_newPwd)
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 
@@ -298,10 +301,10 @@ Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldP
 })
 
 //return a random number in the range from 1 to max
-// Cypress.Commands.add('random', (max) => {
-//     const rndInt = Math.floor(Math.random() * max) + 1
+Cypress.Commands.add('random', (max) => {
+    const rndInt : number = Math.floor(Math.random() * max) + 1
 //     return rndInt
-// })
+})
 
 //add new func in interior or exterior
 Cypress.Commands.add('addNew', (InteriorOrExterior) => {
@@ -538,9 +541,13 @@ Cypress.Commands.add('visitTheMainPage', () => {
 })
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
+    cy.intercept('POST', '/api/v1/user/login').as('___logInStatus')
     cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
     cy.get('[data-test-id="password"]').clear().type(password)
     cy.get('[data-test-id="signInBtn"]').click();
+    cy.wait('@___logInStatus').then((_interception) => {
+        Cypress.env('accessToken', _interception.response.body.data.accessToken)
+    })
 })
 
 Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {

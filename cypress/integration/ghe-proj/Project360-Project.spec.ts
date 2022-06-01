@@ -15,6 +15,7 @@ describe('project360 - project tab functionalities', () => {
 
   context('modify projects properties', () => {
     beforeEach('go to project -> modify the last project', () => {
+      // cy.visit(Cypress.config().baseUrl)
       //navigate to project
       cy.navigateTo('project')
       //click modify
@@ -24,13 +25,78 @@ describe('project360 - project tab functionalities', () => {
     })
 
     context('material', () => {
+      before('create a material via API to copy from', () => {
+        //log in to get auth token at /api/v1/user/login
+        cy.request('POST', `${Cypress.config().baseUrl}api/v1/user/login`, {
+          "loginName": "admin",
+          "password": "admin",
+          "remember": false
+        })
+          .then(
+            (response) => {
+              // cy.wrap(response.body.data.accessToken).as('accessToken')
+              Cypress.env('accessToken', response.body.data.accessToken)
+              //get total amount of material
+              cy.request({
+                method: 'GET',
+                url: `${Cypress.config().baseUrl}api/v1/material`,
+                headers: {
+                  authorization: `Bearer ${Cypress.env('accessToken')}`
+                },
+              }).then(
+                (response) => {
+                  cy.log(response.body.data.total)
+                  Cypress.env('totalAmountOfMaterial', response.body.data.total)
+                })
+              //create new project project-to-copy-material
+              //req api/v1/realestateproject
+              cy.request({
+                method: 'POST',
+                url: `${Cypress.config().baseUrl}api/v1/realestateproject`,
+                headers: {
+                  authorization: `Bearer ${Cypress.env('accessToken')}`
+                },
+                body: {"name":"project-to-copy-material","number":"project-to-copy-material","isSocialHouse":false}
+              }).then(
+                (response) => {
+                  // expect(response.status).to.eq(200)
+                  const rndInt : number = Math.floor(Math.random() * parseInt(Cypress.env('totalAmountOfMaterial')) ) + 1
+                  Cypress.env('projectID',response.body.data.id)
+                  cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config().baseUrl}api/v1/material/project/${Cypress.env('projectID')}`,
+                    headers: {
+                      authorization: `Bearer ${Cypress.env('accessToken')}`
+                    },
+                    body: {"material":{"value":`${rndInt}`}}
+                  })
+                })
+
+              // cy.request({
+              //   method: 'POST',
+              //   url: `${Cypress.config().baseUrl}api/v1/material`,
+              //   headers: {
+              //     authorization: `Bearer ${Cypress.env('accessToken')}`
+              //   },
+              //   body: {
+              //     brand: "test-brand",
+              //     name: "material-to-copy",
+              //     number: "material-to-copy"
+              //   }
+              // }).then(
+              //   (response) => {
+              //     expect(response.status).to.eq(200)
+              //   })
+              })
+            })
+
       beforeEach('set up api endpoint listener', () => {
         cy.setUpAliasesForMaterialTab()
         //go to material tab of that project
         cy.get('div[role="tablist"] > a[data-test-id="material"]').click()
       })
 
-      it('add new material details', () => cy.addNewMaterialDetails)
+      it('add new material details', () => cy.addNewMaterialDetails())
 
       it('modify existing project', () => {
         cy.get('button[data-test-id="actMod"]').last().click()
@@ -54,19 +120,20 @@ describe('project360 - project tab functionalities', () => {
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
       })
 
-      it('delete an existing material from current project', () => cy.deleteMaterialFromProjectPage)
+      it('delete an existing material from current project', () => cy.deleteMaterialFromProjectPage())
 
-      it.skip('copy material from other project', () => {
+      it('copy material from other project', () => {
         //more settings button
         cy.get('button[data-test-id="matSettings"]').click()
         //copy from other proj button
         cy.get('li[data-test-id="matCopy"]').click()
         //click save when no data entered
         cy.get('button[data-test-id="saveBtn"]').click()
-        //assert
-        cy.get('input[aria-invalid="true"]').should('exist')
         //dropdown list -> select the last option
         cy.get('button > svg[data-testid="ArrowDropDownIcon"]').click()
+        //assert
+        cy.get('input[aria-invalid="true"]').type('copy-material')
+        
         cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
           .should('be.visible')
           .last()

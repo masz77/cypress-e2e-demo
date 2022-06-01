@@ -23,8 +23,6 @@ describe('project360 - material tab functionalities', () => {
           }})
         cy.logInCmd('admin', 'admin')
         cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
-        // cy.changeLangToEng()
-
         //navigate to project
         cy.get('a[href="/admin/material"]').click()
         cy.url().should('contain', 'admin/material')
