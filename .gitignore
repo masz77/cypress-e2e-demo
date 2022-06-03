@@ -2,7 +2,7 @@
 /debug.log
 /cypress/integration/1-getting-started
 /cypress/integration/2-advanced-examples
-/cypress/reports
+/cypress/reports/
 /cypress-syntax-and-example
 /cypress/screenshots
 /cypress/videos

@@ -1,7 +1,7 @@
 {
   "scripts": {
     "open": "npx cypress open",
-    "run": "cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
+    "run-tests-headless": "npx cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
     "run-chrome": "cypress run --browser chrome",
     "run-firefox": "cypress run --browser firefox",
     "run-edge": "cypress run --browser edge",
