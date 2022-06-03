@@ -14,7 +14,7 @@ describe('sign up and role', () => {
     cy.intercept('DELETE', 'api/v1/user').as('deleteUser')
   })
 
-  context.only('agency account', () => {
+  context('agency account', () => {
     before('setting up account', () => {
       cy.setUpNewAccount()
     })

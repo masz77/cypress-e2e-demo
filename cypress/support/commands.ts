@@ -541,13 +541,13 @@ Cypress.Commands.add('visitTheMainPage', () => {
 })
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
-    cy.intercept('POST', '/api/v1/user/login').as('___logInStatus')
+    // cy.intercept('POST', '/api/v1/user/login').as('___logInStatus')
     cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
     cy.get('[data-test-id="password"]').clear().type(password)
     cy.get('[data-test-id="signInBtn"]').click();
-    cy.wait('@___logInStatus').then((_interception) => {
-        Cypress.env('accessToken', _interception.response.body.data.accessToken)
-    })
+    // cy.wait('@___logInStatus').then((_interception) => {
+    //     Cypress.env('accessToken', _interception.response.body.data.accessToken)
+    // })
 })
 
 Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {
