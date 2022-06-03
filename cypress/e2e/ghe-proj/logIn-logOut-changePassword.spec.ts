@@ -54,7 +54,7 @@ describe('log in / change password / log out', () => {
         })
     })
 
-    context.only('user / role testing', () => {
+    context('user / role testing', () => {
         before('visit the main page and log in as admin', () => {
             cy.visitTheMainPage()
             cy.logInAsAdmin()
@@ -68,7 +68,7 @@ describe('log in / change password / log out', () => {
             cy.intercept('GET', '/api/v1/user?p=0&ps=10').as('refreshPage')
         })
 
-        context('create new user', () => {
+        context.only('create new user', () => {
             beforeEach('set up listener', () => {
                 cy.navigateTo('user')
                 cy.get('a[data-test-id="addNewBtn"]').click()
@@ -145,17 +145,27 @@ describe('log in / change password / log out', () => {
                 }
             })
         })
-        context('delete user', () => {
+        context.only('delete user', () => {
             it('delete user', () => {
-                cy.navigateTo('user')
-                cy.wait('@refreshPage').then((_interception) => {
-                    expect(_interception.response.statusCode).to.eq(200)
-                })
-                cy.get('button[data-test-id="actDel"]').last().click()
-                cy.get('button').contains('OK').click()
-
-                cy.wait('@deleteUser', { timeout: 10000 }).then((_interception) => {
-                    expect(_interception.response.statusCode).to.eq(200)
+                
+                cy.fixture('newUser.json').then(function (newUser) {
+                    const _name = Object.keys(newUser[0])
+                    
+                    for (let i = 0; i < newUser.length; i++) {
+                        // cy.logInAsAdmin()
+                        cy.navigateTo('project')
+                        cy.navigateTo('user')
+                        // cy.wait('@refreshPage').then((_interception) => {
+                        //     expect(_interception.response.statusCode).to.eq(200)
+                        // })
+                        const _user = newUser[i];
+                        cy.searchFor(_user.name)
+                        cy.get('button[data-test-id="actDel"]').last().click()
+                        cy.get('button').contains('OK').click()
+                        cy.wait('@deleteUser').then((_interception) => {
+                            expect(_interception.response.statusCode).to.eq(200)
+                        })
+                    }
                 })
             })
         })
