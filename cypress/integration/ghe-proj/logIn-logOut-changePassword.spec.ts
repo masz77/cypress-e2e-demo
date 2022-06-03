@@ -36,47 +36,6 @@ describe('log in / change password / log out', () => {
         })
     })
 
-    context('change password', () => {
-        beforeEach('load account fixture', () => {
-            cy.visitTheMainPage()
-        })
-        it('change password fail/success to new password on multiple accounts', function () {
-            try {
-                // const userArray = this.usersData
-                // const userArrayLength = userArray.length
-                cy.fixture('account.json').then(function (usersData) {
-                    cy.log(usersData.length)
-                    for (let _indx = 0; _indx < usersData.length; _indx++) {
-                        const user = usersData[_indx];
-                        let _id = user.userName
-                        let _oldPwd = user.currentPassword
-                        let _newPwd = user.newPassword
-                        cy.changePasswordToNewPassword(_id, _oldPwd, _newPwd)
-                    }
-                })
-            } catch (_e) {
-                cy.log(_e)
-            }
-        })
-        it('change password fail/success to old password on multiple accounts', function () {
-            try {
-                // const userArray = this.usersData
-                // const userArrayLength = userArray.length
-                cy.fixture('account.json').then(function (usersData) {
-                    cy.log(usersData.length)
-                    for (let _indx = 0; _indx < usersData.length; _indx++) {
-                        const user = usersData[_indx];
-                        let _id = user.userName
-                        let _oldPwd = user.currentPassword
-                        let _newPwd = user.newPassword
-                        cy.changePasswordToOldPassword(_id, _oldPwd, _newPwd)
-                    }
-                })
-            } catch (_e) {
-                cy.log(_e)
-            }
-        })
-    })
 
     context('log in unsuccessfully', () => {
         beforeEach('visit the main page', () => {
@@ -95,7 +54,7 @@ describe('log in / change password / log out', () => {
         })
     })
 
-    context('create new account', () => {
+    context.only('user / role testing', () => {
         before('visit the main page and log in as admin', () => {
             cy.visitTheMainPage()
             cy.logInAsAdmin()
@@ -107,55 +66,97 @@ describe('log in / change password / log out', () => {
             cy.intercept('POST', '/api/v1/user/create').as('addNewUser')
             //refreshing token api/v1/user?p=0&ps=10
             cy.intercept('GET', '/api/v1/user?p=0&ps=10').as('refreshPage')
-
-        })
-        it('return error if enter nothing', () => {
-            
-            cy.navigateTo('user')
-            cy.get('a[data-test-id="addNewBtn"]').click()
-            cy.url().then((url) => {
-                expect(url).to.contain('/user/new')
-            })
-            cy.get('button[data-test-id="saveBtn"]').click()
-            cy.get('input[aria-invalid="true"]').then(($el) => {
-                expect($el.length).to.eq(6)
-            })
         })
 
-        it('fill in data and create new user', () => {
-            
-            cy.addUser()
-            //fill in data and
-            cy.wait('@addNewUser').then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(200)
+        context('create new user', () => {
+            beforeEach('set up listener', () => {
+                cy.navigateTo('user')
+                cy.get('a[data-test-id="addNewBtn"]').click()
+            })
+            it('return error if enter nothing', () => {
+
+                cy.url().then((url) => {
+                    expect(url).to.contain('/user/new')
+                })
+                cy.get('button[data-test-id="saveBtn"]').click()
+                cy.get('input[aria-invalid="true"]').then(($el) => {
+                    expect($el.length).to.eq(6)
+                })
+            })
+
+            it('fill in data and create new user', () => {
+                //fill in data and
+                cy.addUser()
+            })
+
+            it('check for duplicate user', () => {
+                // cy.navigateTo('user')
+                // cy.get('a[data-test-id="addNewBtn"]').click()
+                cy.url().then((url) => {
+                    expect(url).to.contain('/user/new')
+                })
+                cy.wait('@refreshPage').then((_interception) => {
+                    expect(_interception.response.statusCode).to.eq(200)
+                })
+                cy.addUser()
+                cy.wait('@addNewUser').then((_interception) => {
+                    expect(_interception.response.statusCode).to.eq(500)
+                })
             })
         })
-
-        it('duplicate user', () => {
-            cy.navigateTo('user')
-            cy.get('a[data-test-id="addNewBtn"]').click()
-            cy.url().then((url) => {
-                expect(url).to.contain('/user/new')
+        context('change password', () => {
+            beforeEach('load account fixture', () => {
+                cy.visitTheMainPage()
             })
-            cy.wait('@refreshPage').then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(200)
+            it('change password fail/success to new password on multiple accounts', function () {
+                try {
+                    // const userArray = this.usersData
+                    // const userArrayLength = userArray.length
+                    cy.fixture('account.json').then(function (usersData) {
+                        cy.log(usersData.length)
+                        for (let _indx = 0; _indx < usersData.length; _indx++) {
+                            const user = usersData[_indx];
+                            let _id = user.userName
+                            let _oldPwd = user.currentPassword
+                            let _newPwd = user.newPassword
+                            cy.changePasswordToNewPassword(_id, _oldPwd, _newPwd)
+                        }
+                    })
+                } catch (_e) {
+                    cy.log(_e)
+                }
             })
-            cy.addUser()
-            cy.wait('@addNewUser').then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(500)
+            it('change password fail/success to old password on multiple accounts', function () {
+                try {
+                    // const userArray = this.usersData
+                    // const userArrayLength = userArray.length
+                    cy.fixture('account.json').then(function (usersData) {
+                        cy.log(usersData.length)
+                        for (let _indx = 0; _indx < usersData.length; _indx++) {
+                            const user = usersData[_indx];
+                            let _id = user.userName
+                            let _oldPwd = user.currentPassword
+                            let _newPwd = user.newPassword
+                            cy.changePasswordToOldPassword(_id, _oldPwd, _newPwd)
+                        }
+                    })
+                } catch (_e) {
+                    cy.log(_e)
+                }
             })
         })
+        context('delete user', () => {
+            it('delete user', () => {
+                cy.navigateTo('user')
+                cy.wait('@refreshPage').then((_interception) => {
+                    expect(_interception.response.statusCode).to.eq(200)
+                })
+                cy.get('button[data-test-id="actDel"]').last().click()
+                cy.get('button').contains('OK').click()
 
-        it('delete user', () => {
-            cy.navigateTo('user')
-            cy.wait('@refreshPage').then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(200)
-            })
-            cy.get('button[data-test-id="actDel"]').last().click()
-            cy.get('button').contains('OK').click()
-
-            cy.wait('@deleteUser',{timeout: 10000}).then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(200)
+                cy.wait('@deleteUser', { timeout: 10000 }).then((_interception) => {
+                    expect(_interception.response.statusCode).to.eq(200)
+                })
             })
         })
     })

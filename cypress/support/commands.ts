@@ -219,7 +219,10 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     cy.intercept('POST', 'api/v1/realestateproject').as('addNewProject')
     cy.get('button[data-test-id="saveBtn"]').click()
     cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
-    cy.wait('@addNewProject').its('response.statusCode').should('be.oneOf', [200])
+    cy.wait('@addNewProject').then((_interception) => {
+        // Cypress.env('projectID',_interception.response.body.data.id)
+        expect(_interception.response.statusCode).to.eq(200)
+    })
     //assert material, in/exteriors are disabled on newly added project
     cy.isProjectProperties('enabled')
 })
@@ -232,15 +235,20 @@ Cypress.Commands.add('addUser', () => {
         for (let i = 0; i < newUser.length; i++) {
             const _user = newUser[i];
             for (let j = 0; j < _name.length; j++) {
-                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
+                cy.get(`input[name="${_name[j]}"]`).clear().type(_user[_name[j]])
             }
+            //press save
+            cy.get('button[data-test-id="saveBtn"]').click()
+            cy.wait('@addNewUser').then((_interception) => {
+                expect(_interception.response.statusCode).to.eq(200)
+            })
+            cy.navigateTo('user')
+            cy.get('a[data-test-id="addNewBtn"]').click()
         }
-        //press save
-        cy.get('button[data-test-id="saveBtn"]').click()
     })
 })
 Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldPwd, test_newPwd) {
-    cy.logInCmd(test_id, test_newPwd).type('{enter}')
+    cy.logInCmd(test_id, test_newPwd)
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
 
@@ -263,7 +271,7 @@ Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldP
 Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldPwd, test_newPwd) {
     ///log in -> change password from CURRENT to NEW -> log out
     //log in
-    cy.logInCmd(test_id, test_oldPwd).type('{enter}')
+    cy.logInCmd(test_id, test_oldPwd)
     //verify url
     cy.url().should('eq', Cypress.config().baseUrl + 'admin/dashboard')
     //change password fail
@@ -293,10 +301,10 @@ Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldP
 })
 
 //return a random number in the range from 1 to max
-// Cypress.Commands.add('random', (max) => {
-//     const rndInt = Math.floor(Math.random() * max) + 1
+Cypress.Commands.add('random', (max) => {
+    const rndInt : number = Math.floor(Math.random() * max) + 1
 //     return rndInt
-// })
+})
 
 //add new func in interior or exterior
 Cypress.Commands.add('addNew', (InteriorOrExterior) => {
@@ -533,9 +541,13 @@ Cypress.Commands.add('visitTheMainPage', () => {
 })
 
 Cypress.Commands.add('logInCmd', (userName, password) => {
+    cy.intercept('POST', '/api/v1/user/login').as('___logInStatus')
     cy.get('[data-test-id="userName"]').clear().type(userName).should('have.value', userName)
     cy.get('[data-test-id="password"]').clear().type(password)
     cy.get('[data-test-id="signInBtn"]').click();
+    cy.wait('@___logInStatus').then((_interception) => {
+        Cypress.env('accessToken', _interception.response.body.data.accessToken)
+    })
 })
 
 Cypress.Commands.add('changePassword', (id, oldPassword, newPassword) => {

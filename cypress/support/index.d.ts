@@ -38,7 +38,7 @@ declare namespace Cypress {
         deleteInOrEx(InteriorOrExterior: string):  Chainable<Element>;
         setUpListener(InteriorOrExterior: string):  Chainable<Element>;
         navigateTo(page: string):  Chainable<Element>;
-        // random(max: number):  Chainable<Element>;
+        random(max: number):  Chainable<Element>;
         
         checkBoxShouldHaveLength(_numberOfCheckBox: number):  Chainable<Element>;
         approveNotaryOfficeAccount(_isApproved: boolean):  Chainable<Element>;
