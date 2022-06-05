@@ -22,7 +22,7 @@ declare namespace Cypress {
         addNewMaterialDetails():  Chainable<Element>;
         createNotaryOfficeUser():  Chainable<Element>;
         setUpNewAccount():  Chainable<Element>;
-        addUser():  Chainable<Element>;
+        addUser(statusCode: number):  Chainable<Element>;
         changeLangToEng():  Chainable<Element>;
         deleteProject(projectName: string):  Chainable<Element>;
         deleteUserByAccountName(accountName: string):  Chainable<Element>;

@@ -245,21 +245,21 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     cy.isProjectProperties('enabled')
 })
 
-Cypress.Commands.add('addUser', () => {
+Cypress.Commands.add('addUser', (__statusCode) => {
 
-    cy.fixture('newUser.json').then(function (newUser) {
+    cy.fixture('newUser.json').then( function (newUser) {
         const _name = Object.keys(newUser[0])
 
         for (let i = 0; i < newUser.length; i++) {
             const _user = newUser[i];
             for (let j = 0; j < _name.length; j++) {
-                cy.get(`input[name="${_name[j]}"]`).clear().type(_user[_name[j]],{force:true})
+                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
             }
             //press save
             cy.get('button[data-test-id="saveBtn"]').click()
-            // cy.wait('@addNewUser').then((_interception) => {
-            //     expect(_interception.response.statusCode).to.eq(200)
-            // })
+            cy.wait('@addNewUser').then((_interception) => {
+                expect(_interception.response.statusCode).to.eq(__statusCode)
+            })
             cy.navigateTo('user')
             cy.get('a[data-test-id="addNewBtn"]').click()
         }
@@ -288,6 +288,8 @@ Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldP
 
 Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldPwd, test_newPwd) {
     ///log in -> change password from CURRENT to NEW -> log out
+    //visit main page
+    cy.visitTheMainPage()
     //log in
     cy.logInCmd(test_id, test_oldPwd)
     //verify url
@@ -494,6 +496,7 @@ Cypress.Commands.add('changeLangToEng', () => {
 
 Cypress.Commands.add('logInAsAdmin', () => {
     cy.visitTheMainPage()
+    cy.url().should('eq', Cypress.config().baseUrl)
     // .its('navigator.language') // yields window.navigator.language
     // .should('equal', 'en-US') // asserts the expected value
     cy.logInCmd('admin', 'admin')
