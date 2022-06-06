@@ -9,7 +9,6 @@ workflows:
           name: Chrome
           requires:
             - cypress/install
-          executor: cypress/browsers-chrome73-ff68
           start: npm start
           record: true
           group: chrome
@@ -18,7 +17,6 @@ workflows:
           name: Firefox
           requires:
             - cypress/install
-          executor: cypress/browsers-chrome73-ff68
           start: npm start
           record: true
           browser: firefox
