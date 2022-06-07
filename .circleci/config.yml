@@ -4,19 +4,6 @@ orbs:
 workflows:
   build:
     jobs:
-      - cypress/install
       - cypress/run:
-          name: Chrome
-          requires:
-            - cypress/install
-          start: npm start
-          record: true
-          group: chrome
+          executor: with-chrome
           browser: chrome
-      - cypress/run:
-          name: Firefox
-          requires:
-            - cypress/install
-          start: npm start
-          record: true
-          browser: firefox

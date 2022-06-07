@@ -44,7 +44,10 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
     cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
         if (index == 0) {
             //at 1st element -> dropdown list select
-            cy.wrap($el).click()
+            // cy.wrap($el).click()
+            cy.get('div[data-test-id="projectMatDetail"]').within(() => {
+                cy.get('svg[data-testid="ArrowDropDownIcon"]').parent().click()
+            })
             cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
                 .should('be.visible')
                 .last()
