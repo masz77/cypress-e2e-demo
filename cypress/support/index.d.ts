@@ -22,7 +22,7 @@ declare namespace Cypress {
         addNewMaterialDetails():  Chainable<Element>;
         createNotaryOfficeUser():  Chainable<Element>;
         setUpNewAccount():  Chainable<Element>;
-        addUser():  Chainable<Element>;
+        addUser(statusCode: number):  Chainable<Element>;
         changeLangToEng():  Chainable<Element>;
         deleteProject(projectName: string):  Chainable<Element>;
         deleteUserByAccountName(accountName: string):  Chainable<Element>;
@@ -34,6 +34,7 @@ declare namespace Cypress {
         changePasswordToNewPassword(test_id: string, test_oldPwd: string, test_newPwd: string):  Chainable<Element>;
         
         searchFor(searchText: string):  Chainable<Element>;
+        pressDeleteButtonThenOK():  Chainable<Element>;
         addNew(InteriorOrExterior: string):  Chainable<Element>;
         deleteInOrEx(InteriorOrExterior: string):  Chainable<Element>;
         setUpListener(InteriorOrExterior: string):  Chainable<Element>;

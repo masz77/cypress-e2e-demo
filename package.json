@@ -1,16 +1,17 @@
 {
   "scripts": {
     "open": "npx cypress open",
-    "run": "cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
-    "run-chrome": "cypress run --browser chrome",
-    "run-firefox": "cypress run --browser firefox",
-    "run-edge": "cypress run --browser edge",
+    "start": "npx cypress run",
+    "on-tests-headless": "npx cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
+    "on-chrome": "cypress run --browser chrome",
+    "on-firefox": "cypress run --browser firefox",
+    "on-edge": "cypress run --browser edge",
     "updateToLatestDevDependenciesAtNewPC": "npm i -g npm-check-updates && ncu -u && npm install",
     "updateToLatestDevDependencies": "ncu -u && npm install",
     "triggerRunner": "npx cypress run --record --key 3113fbb5-65c2-4e16-a98e-f05ba38f1a50 --browser chrome"
   },
   "devDependencies": {
-    "cypress": "^10.0.2",
+    "cypress": "^10.0.3",
     "cypress-mochawesome-reporter": "^3.1.0",
     "typescript": "^4.7.2"
   },

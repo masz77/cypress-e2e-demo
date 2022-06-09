@@ -8,12 +8,12 @@ Cypress.Commands.add('deleteMaterialFromProjectPage', function () {
     cy.get('button').contains('OK').click()
     // Assertion
     cy.wait('@deleteMaterialOfAProject').then((interception) => {
-      assert.equal(interception.response.statusCode, 200)
+        assert.equal(interception.response.statusCode, 200)
     })
     // then Re-Querying The Page -> expect to havve this or we'll have a query loop
     cy.wait('@thenReQueryingThePage').its('response.statusCode').should('be.oneOf', [200])
     cy.get('div[role="status"]').contains('Deleted successfully!').should('exist').and('be.visible')
-  })
+})
 
 Cypress.Commands.add('setUpAliasesForMaterialTab', function () {
     //get projectID
@@ -44,7 +44,10 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
     cy.get('div[data-test-id="projectMatDetail"] input').each(($el, index, $list) => {
         if (index == 0) {
             //at 1st element -> dropdown list select
-            cy.wrap($el).click()
+            // cy.wrap($el).click()
+            cy.get('div[data-test-id="projectMatDetail"]').within(() => {
+                cy.get('svg[data-testid="ArrowDropDownIcon"]').parent().click()
+            })
             cy.get('div[role=presentation] ul[role=listbox] li[role=option]')
                 .should('be.visible')
                 .last()
@@ -73,14 +76,22 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
     cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 })
 
+Cypress.Commands.add("pressDeleteButtonThenOK", function () {
+  cy.get('button[data-test-id="actDel"]').each(function ($ele, index, $list) {
+    $ele.click();
+    cy.get("button.Button-error").click({force:true,multiple:true});
+  });
+});
+
+
 Cypress.Commands.add('deleteProject', function (projectName) {
     //navigate to project
     cy.navigateTo('project')
     cy.searchFor(projectName)
     cy.isExistInRow(projectName, true)
 
-    cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
-    cy.get('button').contains('OK').click()
+    cy.pressDeleteButtonThenOK()
+    // .last().click() ///api/v1/realestateproject
     cy.wait('@deleteProject').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
     })
@@ -191,9 +202,27 @@ Cypress.Commands.add('isExistInRow', function (searchText, _isExist) {
 Cypress.Commands.add('searchFor', function (searchText) {
     //search for account name
     cy.get('div[data-test-id="searchDiv"]').click().then(() => {
-        cy.get('input[name="search"]').type(searchText)
+        cy.get('input[name="search"]').clear().type(searchText)
     })
     cy.wait(1500)
+    // try {
+    //     if (cy.find('input[name="search"]',{timeout:500}) != null) {
+    //         cy.get('input[name="search"]').clear().type(searchText)
+    //         cy.wait(1500)
+    //     } else {
+    //         //search for account name
+    //         cy.get('div[data-test-id="searchDiv"]').click().then(() => {
+    //             cy.get('input[name="search"]').clear().type(searchText)
+    //         })
+    //         cy.wait(1500)
+    //     }
+    // } catch (error) {
+    //     //search for account name
+    //     cy.get('div[data-test-id="searchDiv"]').click().then(() => {
+    //         cy.get('input[name="search"]').clear().type(searchText)
+    //     })
+    //     cy.wait(1500)
+    // }
     //improvement
     // cy.wait('@searchQuery').then((interception) => {
     //     assert.equal(interception.response.statusCode, 200)
@@ -227,20 +256,20 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     cy.isProjectProperties('enabled')
 })
 
-Cypress.Commands.add('addUser', () => {
+Cypress.Commands.add('addUser', (__statusCode) => {
 
-    cy.fixture('newUser.json').then(function (newUser) {
+    cy.fixture('newUser.json').then( function (newUser) {
         const _name = Object.keys(newUser[0])
 
         for (let i = 0; i < newUser.length; i++) {
             const _user = newUser[i];
             for (let j = 0; j < _name.length; j++) {
-                cy.get(`input[name="${_name[j]}"]`).clear().type(_user[_name[j]])
+                cy.get(`input[name="${_name[j]}"]`).type(_user[_name[j]])
             }
             //press save
             cy.get('button[data-test-id="saveBtn"]').click()
             cy.wait('@addNewUser').then((_interception) => {
-                expect(_interception.response.statusCode).to.eq(200)
+                expect(_interception.response.statusCode).to.eq(__statusCode)
             })
             cy.navigateTo('user')
             cy.get('a[data-test-id="addNewBtn"]').click()
@@ -270,6 +299,8 @@ Cypress.Commands.add('changePasswordToOldPassword', function (test_id, test_oldP
 
 Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldPwd, test_newPwd) {
     ///log in -> change password from CURRENT to NEW -> log out
+    //visit main page
+    cy.visitTheMainPage()
     //log in
     cy.logInCmd(test_id, test_oldPwd)
     //verify url
@@ -302,8 +333,8 @@ Cypress.Commands.add('changePasswordToNewPassword', function (test_id, test_oldP
 
 //return a random number in the range from 1 to max
 Cypress.Commands.add('random', (max) => {
-    const rndInt : number = Math.floor(Math.random() * max) + 1
-//     return rndInt
+    const rndInt: number = Math.floor(Math.random() * max) + 1
+    //     return rndInt
 })
 
 //add new func in interior or exterior
@@ -434,25 +465,26 @@ Cypress.Commands.add('clickAddNewButton', () => {
 
 //navigate to status
 Cypress.Commands.add('navigateTo', (page) => {
-        try {
-            const _page = ['project', 'material', 'project-status', 'user', 'request-user', 'legal-support', 'legal-support-common']
-            for (let i = 0; i < _page.length; i++) {
-                const _e = _page[i];
-                if (page == _e) {
-                    cy.get(`a[href="/admin/${page}"]`).click({
-                        force: true
-                    })
-                    cy.url().should('contain', `admin/${page}`)
-                    break
-                } else {
-                    // cy.log('Allowed value are: project, material, project-status')
-                }
+    try {
+        const _page = ['project', 'material', 'project-status', 'user', 'request-user', 'legal-support', 'legal-support-common']
+        for (let i = 0; i < _page.length; i++) {
+            const _e = _page[i];
+            if (page == _e) {
+                cy.get(`a[href="/admin/${page}"]`).click({
+                    force: true
+                })
+                // cy.visit(`/admin/${page}"]`)
+                cy.url().should('contain', `admin/${page}`)
+                break
+            } else {
+                // cy.log('Allowed value are: project, material, project-status')
             }
-
-        } catch (error) {
-            // cy.log('Allowed value are: project, material, project-status')
         }
+
+    } catch (error) {
+        // cy.log('Allowed value are: project, material, project-status')
     }
+}
 
     // function project() {
     //     cy.get('a[href="/admin/project"]').click()
@@ -475,6 +507,7 @@ Cypress.Commands.add('changeLangToEng', () => {
 
 Cypress.Commands.add('logInAsAdmin', () => {
     cy.visitTheMainPage()
+    cy.url().should('eq', Cypress.config().baseUrl)
     // .its('navigator.language') // yields window.navigator.language
     // .should('equal', 'en-US') // asserts the expected value
     cy.logInCmd('admin', 'admin')

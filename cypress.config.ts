@@ -24,6 +24,6 @@ export default defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'http://ghe-staging.b2ssolution.com/',
-    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+    specPattern: 'cypress/ghe-project-e2e-testing/*.{js,jsx,ts,tsx}',
   },
 })

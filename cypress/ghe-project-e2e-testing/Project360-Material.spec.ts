@@ -11,8 +11,7 @@ describe('project360 - material tab functionalities', () => {
         // })
     })
 
-    context('creates new project with details', () => {
-      it('navigate to material -> add new material', () => {
+      it('add new material', () => {
 
         //log in and assert
         cy.visit(Cypress.config().baseUrl, {
@@ -69,25 +68,31 @@ describe('project360 - material tab functionalities', () => {
         cy.contains('Material detail').should('be.visible')
 
         //try save button
-        cy.fillInDetail('modified-number', 'modified-name', 'modified-brand')
+        const _randomNumber = Math.floor(Math.random() * 10000)
+
+        cy.wrap(_randomNumber).as('randomMaterialNumber')
+
+        cy.fillInDetail(`material-number-${_randomNumber}`, `material-name-${_randomNumber}`, `material-brand-${_randomNumber}`)
         cy.get('button[data-test-id="saveBtn"]').click()
         cy.wait('@matSaveStatus').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 
         //navigate to material
-        cy.navigateTo('material')
+        // cy.navigateTo('material')
         
-        let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
-            cy.get('td').should('contain','modified-number')
-                        .should('contain','modified-name')
-                        .should('contain','modified-brand')
-        })
+        // let td_element = cy.get('tbody > tr').last().should('be.visible').within (() => {
+        //     cy.get('td').should('contain','modified-number')
+        //                 .should('contain','modified-name')
+        //                 .should('contain','modified-brand')
+        // })
       })
 
-      it('delete', () => {
+      it('delete', function () {
         //navigate to material
         cy.navigateTo('material')
 
+        //search for new modified name
+        cy.searchFor(this.randomMaterialNumber)
         //get the last delete button and click
         cy.get('button[data-test-id="actDel"]').last().click()
         //confirm
@@ -96,6 +101,4 @@ describe('project360 - material tab functionalities', () => {
         cy.wait('@matDeleteStatus').its('response.statusCode').should('be.oneOf', [200])
         cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
       })
-      
-    })
 })
