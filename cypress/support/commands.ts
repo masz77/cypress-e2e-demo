@@ -76,14 +76,22 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
     cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 })
 
+Cypress.Commands.add("pressDeleteButtonThenOK", function () {
+  cy.get('button[data-test-id="actDel"]').each(function ($ele, index, $list) {
+    $ele.click();
+    cy.get("button.Button-error").click({force:true,multiple:true});
+  });
+});
+
+
 Cypress.Commands.add('deleteProject', function (projectName) {
     //navigate to project
     cy.navigateTo('project')
     cy.searchFor(projectName)
     cy.isExistInRow(projectName, true)
 
-    cy.get('button[data-test-id="actDel"]').last().click() ///api/v1/realestateproject
-    cy.get('button').contains('OK').click()
+    cy.pressDeleteButtonThenOK()
+    // .last().click() ///api/v1/realestateproject
     cy.wait('@deleteProject').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
     })
