@@ -76,10 +76,17 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
     cy.get('div[role="status"]').contains('Saved success!').should('exist').and('be.visible')
 })
 
-Cypress.Commands.add("pressDeleteButtonThenOK", function () {
+Cypress.Commands.add("pressDeleteButtonThenOK", function (_alias, statusCode) {
   cy.get('button[data-test-id="actDel"]').each(function ($ele, index, $list) {
     $ele.click();
-    cy.get("button.Button-error").click({force:true,multiple:true});
+    // cy.get("button.Button-error").click({force:true,multiple:true});
+    cy.get("button").contains('OK').click({
+        force:true,
+        multiple:true
+    });
+        cy.wait(_alias).then((interception) => {
+        assert.equal(interception.response.statusCode, statusCode)
+    })
   });
 });
 
@@ -90,11 +97,11 @@ Cypress.Commands.add('deleteProject', function (projectName) {
     cy.searchFor(projectName)
     cy.isExistInRow(projectName, true)
 
-    cy.pressDeleteButtonThenOK()
+    cy.pressDeleteButtonThenOK('@deleteProject',200)
     // .last().click() ///api/v1/realestateproject
-    cy.wait('@deleteProject').then((interception) => {
-        assert.equal(interception.response.statusCode, 200)
-    })
+    // cy.wait('@deleteProject').then((interception) => {
+    //     assert.equal(interception.response.statusCode, 200)
+    // })
     cy.get('div[role="status"]').contains('Deleted').should('exist').and('be.visible')
 })
 

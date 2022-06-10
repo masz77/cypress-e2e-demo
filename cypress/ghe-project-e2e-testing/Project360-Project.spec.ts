@@ -163,10 +163,11 @@ describe("project360 - project tab functionalities", () => {
       });
 
       it("can delete material that have been used in a project", function () {
+        cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
         cy.navigateTo('material')
         cy.searchFor(`copy-for-${this.projectName}`)
         cy.wait(1500)
-        cy.pressDeleteButtonThenOK()
+        cy.pressDeleteButtonThenOK('@matDeleteStatus',200)
       });
     });
 

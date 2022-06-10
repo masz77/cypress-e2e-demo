@@ -34,7 +34,7 @@ declare namespace Cypress {
         changePasswordToNewPassword(test_id: string, test_oldPwd: string, test_newPwd: string):  Chainable<Element>;
         
         searchFor(searchText: string):  Chainable<Element>;
-        pressDeleteButtonThenOK():  Chainable<Element>;
+        pressDeleteButtonThenOK(_alias: string, statusCode:number):  Chainable<Element>;
         addNew(InteriorOrExterior: string):  Chainable<Element>;
         deleteInOrEx(InteriorOrExterior: string):  Chainable<Element>;
         setUpListener(InteriorOrExterior: string):  Chainable<Element>;
