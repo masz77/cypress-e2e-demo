@@ -77,17 +77,26 @@ Cypress.Commands.add('addNewMaterialDetails', function () {
 })
 
 Cypress.Commands.add("pressDeleteButtonThenOK", function (_alias, statusCode) {
-  cy.get('button[data-test-id="actDel"]').each(function ($ele, index, $list) {
-    $ele.click();
+  cy.get('button[data-test-id="actDel"]').each(($ele, index, $list) => {
+    cy.wrap($ele).click();
     // cy.get("button.Button-error").click({force:true,multiple:true});
-    cy.get("button").contains('OK').click({
-        force:true,
-        multiple:true
-    });
-        cy.wait(_alias).then((interception) => {
-        assert.equal(interception.response.statusCode, statusCode)
-    })
+    cy.get("button.Button-error")
+      .contains("OK")
+      .click({
+        force: true,
+        // multiple: true,
+      })
+      .then(() => {
+        cy.wait(200);
+        cy.get("button.Button-error").contains("OK").click({
+          force: true,
+        });
+        cy.wait(200);
+      });
   });
+//   cy.wait(_alias).then((interception) => {
+//     assert.equal(interception.response.statusCode, statusCode);
+//   });
 });
 
 
@@ -133,7 +142,7 @@ Cypress.Commands.add('approveNotaryOfficeAccount', function (_isApproved) {
 
 Cypress.Commands.add('createNotaryOfficeUser', function () {
 
-    cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+    cy.signUpFunc(this.accountName, this.phone, this.prefix, this.userName, this.password, 1)
     cy.wait('@createUser').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
     })
@@ -164,32 +173,55 @@ Cypress.Commands.add('deleteUserByAccountName', function (accountName) {
     })
 })
 
+function makeRandomStringWithLengthOf(length: number) {
+    let result           = '';
+    const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+
 Cypress.Commands.add('setUpNewAccount', function () {
     //create reusable var
+    const __prefix = makeRandomStringWithLengthOf(3)
     const _randomAccountNumber = Math.floor(Math.random() * 10000)
     cy.wrap(`username${_randomAccountNumber}`).as('accountName')
     cy.wrap(`321ewq;\'`).as('password')
     cy.wrap(Math.floor(Math.random() * 1000000000)).as('phone')
+    cy.wrap(__prefix).as('prefix')
     cy.wrap(`username${_randomAccountNumber}`).as('userName')
     cy.wrap(`projectNumber${_randomAccountNumber}`).as('projectNumber')
     cy.wrap(`projectName${_randomAccountNumber}`).as('projectName')
 })
 
-Cypress.Commands.add('signUpFunc', function (accountName, phone, userName, password, mode) {
+Cypress.Commands.add(
+  "signUpFunc",
+  function (accountName, phone, prefix, userName, password, mode) {
     //test
     cy.get('[href="/sign-up"]').click();
-    cy.url().should('contain', '/sign-up')
+    cy.url().should("contain", "/sign-up");
     cy.get('[data-test-id="name"]').clear().type(accountName);
     cy.get('[data-test-id="phone"]').clear().type(phone.toString()); //10 number
-    cy.get('[data-test-id="email"]').clear().type('e@g.c');
+    cy.get('[data-test-id="email"]').clear().type("e@g.c");
+    cy.get('input[name="prefix"]').clear().type(prefix);
     cy.get('[data-test-id="userName"]').clear().type(userName);
     cy.get('[data-test-id="password"]').clear().type(password);
     cy.get('[data-test-id="repeat_password"]').clear().type(password);
     cy.get('input[type="radio"]').then(($list) => {
-        $list.eq(mode).click() //or Notary office = 1 or Agency = 0
-    })
+      $list.eq(mode).click(); //or Notary office = 1 or Agency = 0
+    });
     cy.get('[data-test-id="signInBtn"]').click();
-})
+    
+    //assert invalid phone
+    cy.get('[data-test-id="phone"]').should('have.attr','aria-invalid','true')
+    //enter new phone
+    cy.get('[data-test-id="phone"]').clear().type('0911111111');
+    cy.get('[data-test-id="signInBtn"]').click();
+  }
+);
 
 Cypress.Commands.add('isExistInRow', function (searchText, _isExist) {
     if (_isExist == true) {
@@ -242,7 +274,7 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
     //click add new
     cy.clickAddNewButton()
     cy.url().should('contain', 'admin/project/new')
-    cy.isProjectProperties('disabled')
+    // cy.isProjectProperties('disabled')
     //fill in required field
     cy.insertRequiredFieldForAddnew(projectNumber, projectName)
     //click reset
@@ -260,7 +292,7 @@ Cypress.Commands.add('createNewProject', function (projectName, projectNumber) {
         expect(_interception.response.statusCode).to.eq(200)
     })
     //assert material, in/exteriors are disabled on newly added project
-    cy.isProjectProperties('enabled')
+    // cy.isProjectProperties('enabled')
 })
 
 Cypress.Commands.add('addUser', (__statusCode) => {

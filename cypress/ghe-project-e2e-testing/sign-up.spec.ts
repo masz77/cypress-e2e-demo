@@ -23,7 +23,7 @@ describe('sign up and role', () => {
       // cy.intercept('GET', `/api/v1/requestuser?p=0&ps=10&s=${accountName}`).as('searchQuery')
 
       //fill in data and type of reg, 0 for agency | 1 for notary
-      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 0)
+      cy.signUpFunc(this.accountName, this.phone, this.prefix, this.userName, this.password, 0)
       //if user exist, generate another random user name
       cy.wait('@createUser').then((interception) => {
         try {
@@ -37,17 +37,18 @@ describe('sign up and role', () => {
         }
       })
     })
+
     it('can log in to created account and create new project', function () {
-      cy.logInCmd(this.userName, this.password)
+      cy.logInCmd(`${this.prefix}.${this.userName}`, this.password)
       cy.createNewProject(`new project name of ${this.userName}`, `new project number of ${this.userName}`)
     })
         
-    it('can modify material of new project', function () {
-      cy.logInCmd(this.userName, this.password)
+    it.skip('can modify material of new project', function () {
+      cy.logInCmd(`${this.prefix}.${this.userName}`, this.password)
       //navigate to project
       cy.navigateTo('project')
       //search for the new created project
-      cy.searchFor(`new project name of ${this.userName}`)
+      cy.searchFor(`agency ${this.userName}'s project`)
       //click modify
       cy.get('button[data-test-id="actMod"]').last().click()
 
@@ -59,7 +60,7 @@ describe('sign up and role', () => {
       cy.deleteMaterialFromProjectPage()
     })
 
-    it('can modify interior of new project', function () {
+    it.skip('can modify interior of new project', function () {
       cy.logInCmd(this.userName, this.password)
       //navigate to project
       cy.navigateTo('project')
@@ -75,7 +76,7 @@ describe('sign up and role', () => {
       cy.deleteInOrEx('interior')
     })
 
-    it('can modify exterior of new project', function () {
+    it.skip('can modify exterior of new project', function () {
       cy.logInCmd(this.userName, this.password)
       //navigate to project
       cy.navigateTo('project')
@@ -90,6 +91,7 @@ describe('sign up and role', () => {
 
       cy.deleteInOrEx('exterior')
     })
+
     it('can delete new project', function () {
       cy.logInCmd(this.userName, this.password)
       cy.intercept('DELETE', `/api/v1/realestateproject`).as('deleteProject')
@@ -98,7 +100,7 @@ describe('sign up and role', () => {
 
     it('check for account duplication', function () {
       //fill in data and type of reg, 0 for agency | 1 for notary
-      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 0)
+      cy.signUpFunc(this.accountName, this.phone, this.prefix, this.userName, this.password, 0)
       //if user exist, generate another random user name
       cy.wait('@createUser').then((interception) => {
         assert.equal(interception.response.statusCode, 500)
@@ -132,7 +134,7 @@ describe('sign up and role', () => {
     })
 
     it('check for duplication', function () {
-      cy.signUpFunc(this.accountName, this.phone, this.userName, this.password, 1)
+      cy.signUpFunc(this.accountName, this.phone, this.prefix, this.userName, this.password, 1)
       cy.wait('@createUser').then((interception) => {
         assert.equal(interception.response.statusCode, 200)
       })

@@ -44,7 +44,7 @@ declare namespace Cypress {
         checkBoxShouldHaveLength(_numberOfCheckBox: number):  Chainable<Element>;
         approveNotaryOfficeAccount(_isApproved: boolean):  Chainable<Element>;
         
-        signUpFunc(accountName: string, phone: number, userName: string, password: string, mode: number):  Chainable<Element>;
+        signUpFunc(accountName: string, phone: number, prefix: string , userName: string, password: string, mode: number):  Chainable<Element>;
 
         
     }
