@@ -20,15 +20,15 @@ it.skip("will purge all existing data", function () {
       const _res = getTotalProjectResponse;
       const totalAmountOfProjects = _res.body.data.total;
       for (let __i = 1; __i < totalAmountOfProjects; __i++) {
-          let _projectIDtoDelete  = _res.body.data.list[__i].id
+        let _projectIDtoDelete = _res.body.data.list[__i].id;
         cy.request({
-            method: "DELETE",
-            url: `${Cypress.config().baseUrl}api/v1/realestateproject`,
-            headers: {
-              authorization: `Bearer ${Cypress.env("accessToken")}`,
-            },
-            body: _projectIDtoDelete
-        })
+          method: "DELETE",
+          url: `${Cypress.config().baseUrl}api/v1/realestateproject`,
+          headers: {
+            authorization: `Bearer ${Cypress.env("accessToken")}`,
+          },
+          body: JSON.stringify(_projectIDtoDelete),
+        });
       }
     });
   });
