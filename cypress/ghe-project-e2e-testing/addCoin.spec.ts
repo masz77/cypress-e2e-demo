@@ -36,8 +36,9 @@ describe("coin related tasks", () => {
       .last()
       .click();
 
+    let _coinAmount: number = 69420;
     cy.get('input[name="realAmount"]').type("1000");
-    cy.get('input[name="amount"]').type("69420");
+    cy.get('input[name="amount"]').type(_coinAmount.toString());
     cy.get('button[data-test-id="saveBtn"]').click();
 
     // cy.wait(1000);
@@ -51,10 +52,39 @@ describe("coin related tasks", () => {
     cy.get("button.Button-error").contains("OK").click();
 
     cy.get('div[role="button"] span').should("contain", "Pending approval");
+    cy.scrollTo("bottom");
     cy.get('button[data-test-id="approveBtn"]').click();
     // cy.get('button[data-test-id="rejectBtn"]').click();
     cy.get("button.Button-error").contains("OK").click();
+
     cy.get('div[role="button"] span').should("contain", "Approved");
+
+    let _coinAmountXPath = "/html/body/div[1]/div[1]/header/div/div[7]/b";
+    cy.xpath(_coinAmountXPath)
+      .invoke("text")
+      .then((textBefore) => {
+        cy.reload(true);
+        cy.wait(2000);
+        cy.xpath(_coinAmountXPath)
+          .invoke("text")
+          .should((textAfter) => {
+            let _finalCoin: number =
+              parseInt(textBefore.replaceAll(",", "")) + _coinAmount;
+            expect(parseInt(textAfter.replaceAll(",", ""))).to.eq(_finalCoin);
+          });
+      });
+    // .then(cy.log);
   });
-  it("", () => {});
+
+  it.skip("testing xpath", () => {
+    cy.logInAsAdmin();
+    cy.wait(2000);
+    cy.xpath("/html/body/div[1]/div[1]/header/div/div[7]/b")
+      .invoke("text")
+      .then(cy.log);
+    // .its("text")
+    // .then(($text) => {
+    //   console.log($text.get(0).innerText);
+    // });
+  });
 });
