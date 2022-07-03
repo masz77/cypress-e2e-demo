@@ -11,13 +11,16 @@
     "triggerRunner": "npx cypress run --record --key 3113fbb5-65c2-4e16-a98e-f05ba38f1a50 --browser chrome"
   },
   "devDependencies": {
-    "cypress": "^10.1.0",
-    "cypress-mochawesome-reporter": "^3.1.0",
-    "mochawesome": "^7.1.3",
-    "typescript": "^4.7.3"
+    "typescript": "^4.7.3",
+    "lodash": "^4.17.21"
   },
   "repository": {
     "type": "git",
     "url": "git+https://bitbucket.org/b2ssolution/automation.git"
+  },
+  "dependencies": {
+    "mochawesome": "^7.1.3",
+    "cypress": "^10.3.0",
+    "cypress-mochawesome-reporter": "^3.2.0"
   }
 }

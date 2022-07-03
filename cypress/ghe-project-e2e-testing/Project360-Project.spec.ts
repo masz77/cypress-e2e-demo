@@ -19,7 +19,7 @@ describe("project360 - project tab functionalities", () => {
       //navigate to project
       cy.navigateTo("project");
       //search for new created project
-      cy.searchFor(`${this.projectName}`)
+      cy.searchFor(`${this.projectName}`);
       //click modify
       cy.get('button[data-test-id="actMod"]').last().click();
       //assert
@@ -36,7 +36,7 @@ describe("project360 - project tab functionalities", () => {
         }).then(function (logInResponse) {
           // cy.wrap(response.body.data.accessToken).as('accessToken')
           Cypress.env("accessToken", logInResponse.body.data.accessToken);
-          
+
           //create new project project-to-copy-material
           cy.request({
             method: "POST",
@@ -50,12 +50,13 @@ describe("project360 - project tab functionalities", () => {
               isSocialHouse: false,
             },
           }).then(function (createProjectResponse) {
-            
             Cypress.env("projectID", createProjectResponse.body.data.id);
-            
+
             const __loop: number = 3;
             for (let __i = 0; __i < __loop; __i++) {
-              let _materialName = `material-${__i+1}-to-copy-for-${this.projectName}`;
+              let _materialName = `material-${__i + 1}-to-copy-for-${
+                this.projectName
+              }`;
 
               //generate materials
               cy.request({
@@ -127,8 +128,7 @@ describe("project360 - project tab functionalities", () => {
       });
 
       it("delete an existing material from current project", () =>
-        cy.deleteMaterialFromProjectPage()
-        );
+        cy.deleteMaterialFromProjectPage());
 
       it("copy material from other project", function () {
         //more settings button
@@ -163,11 +163,11 @@ describe("project360 - project tab functionalities", () => {
       });
 
       it("can delete material that have been used in a project", function () {
-        cy.intercept('DELETE', '/api/v1/material').as('matDeleteStatus')
-        cy.navigateTo('material')
-        cy.searchFor(`copy-for-${this.projectName}`)
-        cy.wait(1500)
-        cy.pressDeleteButtonThenOK('@matDeleteStatus',200)
+        cy.intercept("DELETE", "/api/v1/material").as("matDeleteStatus");
+        cy.navigateTo("material");
+        cy.searchFor(`copy-for-${this.projectName}`);
+        cy.wait(1500);
+        cy.pressDeleteButtonThenOK("@matDeleteStatus", 200, true);
       });
     });
 
@@ -274,7 +274,7 @@ describe("project360 - project tab functionalities", () => {
     it("can delete project", function () {
       cy.intercept("DELETE", `/api/v1/realestateproject`).as("deleteProject");
       cy.logInAsAdmin();
-      cy.deleteProject(this.projectName);
+      cy.deleteProject(this.projectName, false);
     });
   });
 });

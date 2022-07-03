@@ -4,7 +4,7 @@ export default defineConfig({
   video: true,
   screenshotOnRunFailure: true,
   defaultCommandTimeout: 15000,
-  reporter: "mochawesome",
+  reporter: "cypress-mochawesome-reporter",
   reporterOptions: {
     reportDir: "cypress/reports",
     charts: true,
