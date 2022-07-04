@@ -1,13 +1,27 @@
 {
   "scripts": {
     "open": "npx cypress open",
-    "run": "npx cypress run",
-    "run-chrome": "cypress run --browser chrome",
-    "run-firefox": "cypress run --browser firefox",
-    "run-edge": "cypress run --browser edge"
+    "start": "npx cypress run",
+    "on-tests-headless": "npx cypress run --browser chrome && cypress run --browser firefox && cypress run --browser edge",
+    "on-chrome": "cypress run --browser chrome",
+    "on-firefox": "cypress run --browser firefox",
+    "on-edge": "cypress run --browser edge",
+    "updateToLatestDevDependenciesAtNewPC": "npm i -g npm-check-updates && ncu -u && npm install",
+    "updateToLatestDevDependencies": "ncu -u && npm install",
+    "triggerRunner": "npx cypress run --record --key 3113fbb5-65c2-4e16-a98e-f05ba38f1a50 --browser chrome"
   },
   "devDependencies": {
-    "cypress": "^9.5.4",
-    "cypress-mochawesome-reporter": "^3.0.1"
+    "cypress-xpath": "^2.0.0",
+    "lodash": "^4.17.21",
+    "typescript": "^4.7.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/b2ssolution/automation.git"
+  },
+  "dependencies": {
+    "cypress": "^10.3.0",
+    "cypress-mochawesome-reporter": "^3.2.0",
+    "mochawesome": "^7.1.3"
   }
 }

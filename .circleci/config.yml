@@ -1,0 +1,16 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@2
+executors:
+  with-chrome:
+    docker:
+      - image: 'cypress/browsers:node14.16.0-chrome90-ff88'
+workflows:
+  build:
+    jobs:
+      - cypress/run:
+          post-steps:
+            - store_test_results:
+                path: cypress/reports
+            - store_artifacts:
+                path: mochawesome-report

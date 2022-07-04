@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es5", "dom","ES2021"],
+    "types": ["cypress","cypress-xpath","node"]
+  },
+  "include": ["**/*.ts"]
+}

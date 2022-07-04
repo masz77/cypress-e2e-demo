@@ -1,8 +1,16 @@
 [
     {
-        "name": "z",
-        "number": "z",
-        "loginName": "z",
+        "name": "test1",
+        "number": "1111",
+        "loginName": "test1",
+        "email": "z@g.c",
+        "password": "12345678",
+        "passwordRepeat": "12345678"
+    },
+    {
+        "name": "test2",
+        "number": "1111",
+        "loginName": "test2",
         "email": "z@g.c",
         "password": "12345678",
         "passwordRepeat": "12345678"

@@ -2,6 +2,8 @@
 /debug.log
 /cypress/integration/1-getting-started
 /cypress/integration/2-advanced-examples
-/reports
+/cypress/reports/
 /cypress-syntax-and-example
-/screenshots
+/cypress/screenshots
+/cypress/videos
+cypress/reports/index.html
