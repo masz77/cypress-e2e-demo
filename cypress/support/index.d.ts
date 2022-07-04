@@ -59,12 +59,22 @@ declare namespace Cypress {
     ): Chainable<Element>;
 
     searchFor(searchText: string): Chainable<Element>;
+    coinTransfer_approve(isApproved: boolean): Chainable<Element>;
     pressDeleteButtonThenOK(
       _alias: string,
       statusCode: number,
       haveAnotherOKCheck: boolean
     ): Chainable<Element>;
     addNew(InteriorOrExterior: string): Chainable<Element>;
+    coinTransfer_enterCoinNumberAndSubmit(
+      realAmount: number,
+      amount: number,
+      isNumberEnteredValid: boolean
+    ): Chainable<Element>;
+    coinTransfer_selectAccount(
+      field: number,
+      _Receiver: string
+    ): Chainable<Element>;
     deleteInOrEx(InteriorOrExterior: string): Chainable<Element>;
     setUpListener(InteriorOrExterior: string): Chainable<Element>;
     navigateTo(page: string): Chainable<Element>;

@@ -1,5 +1,58 @@
 /// <reference types="cypress" />
 
+Cypress.Commands.add("coinTransfer_approve", function (isApprove) {
+  cy.scrollTo("bottom");
+  if (isApprove) {
+    cy.get('button[data-test-id="approveBtn"]').click();
+    cy.get("button.Button-error").contains("OK").click();
+    cy.get('div[role="button"] span').should("contain", "Approved");
+  } else {
+    cy.get('button[data-test-id="rejectBtn"]').click();
+    cy.get("button.Button-error").contains("OK").click();
+    cy.get('div[role="button"] span').should("contain", "Rejected");
+  }
+});
+
+Cypress.Commands.add(
+  "coinTransfer_enterCoinNumberAndSubmit",
+  function (realAmount, amount, isValid) {
+    cy.intercept("POST", "/api/v1/changeamount/action/Save").as("saveCoin");
+
+    cy.get('input[name="realAmount"]')
+      .clear()
+      .type(`{moveToEnd}${realAmount.toString()}`);
+    cy.get('input[name="amount"]')
+      .clear()
+      .type(`{moveToEnd}${amount.toString()}`);
+    cy.get('button[data-test-id="saveBtn"]').click();
+
+    if (isValid) {
+      cy.get('button[data-test-id="submitBtn"]').click();
+      cy.get("button.Button-error").contains("OK").click();
+      cy.get('div[role="button"] span').should("contain", "Pending approval");
+    } else {
+      cy.wait("@saveCoin").then((interception) => {
+        assert.equal(interception.response.statusCode, 500);
+      });
+    }
+  }
+);
+
+Cypress.Commands.add(
+  "coinTransfer_selectAccount",
+  function (_field, _Receiver) {
+    let _element = ".MuiCardContent-root > :nth-child(2) input";
+    cy.get(_element).within(($input) => {
+      cy.wrap($input[_field]).type(_Receiver);
+      cy.wait(1000);
+    });
+    cy.get("div[role=presentation] ul[role=listbox] li[role=option]")
+      .should("be.visible")
+      .last()
+      .click();
+  }
+);
+
 Cypress.Commands.add("deleteMaterialFromProjectPage", function () {
   //click last delete button
   cy.get('button[data-test-id="actDel"]').last().click();

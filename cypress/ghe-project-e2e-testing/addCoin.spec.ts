@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+/// <reference types="cypress-xpath" />
 // Cypress.SelectorPlayground.defaults({
 //   selectorPriority: [
 //     "data-test-id",
@@ -27,45 +28,24 @@ describe("coin related tasks", () => {
 
     //3 field required
     cy.get('input[aria-invalid="true"]').should("have.length", "3");
-    cy.get(".MuiCardContent-root > :nth-child(2) input").within(($input) => {
-      cy.wrap($input[1]).type("admin");
-      cy.wait(1000);
-    });
-    cy.get("div[role=presentation] ul[role=listbox] li[role=option]")
-      .should("be.visible")
-      .last()
-      .click();
 
-    let _coinAmount: number = 69420;
-    cy.get('input[name="realAmount"]').type("1000");
-    cy.get('input[name="amount"]').type(_coinAmount.toString());
-    cy.get('button[data-test-id="saveBtn"]').click();
+    cy.coinTransfer_selectAccount(1, "admin");
 
-    // cy.wait(1000);
+    let _coinAmount = 69420;
+    let _invalidCoinNumber = 10000000000000000;
+    cy.coinTransfer_enterCoinNumberAndSubmit(1000, _invalidCoinNumber, false);
 
-    // cy.url().then((_url) => {
-    //   const _splitted = _url.split("/");
-    //   console.log(_splitted[_splitted.length - 1]);
-    // console.log(_.last(_url.split("/")));
-    // });
-    cy.get('button[data-test-id="submitBtn"]').click();
-    cy.get("button.Button-error").contains("OK").click();
+    cy.coinTransfer_enterCoinNumberAndSubmit(1000, _coinAmount, true);
 
-    cy.get('div[role="button"] span').should("contain", "Pending approval");
-    cy.scrollTo("bottom");
-    cy.get('button[data-test-id="approveBtn"]').click();
-    // cy.get('button[data-test-id="rejectBtn"]').click();
-    cy.get("button.Button-error").contains("OK").click();
+    cy.coinTransfer_approve(true);
 
-    cy.get('div[role="button"] span').should("contain", "Approved");
-
-    let _coinAmountXPath = "/html/body/div[1]/div[1]/header/div/div[7]/b";
-    cy.xpath(_coinAmountXPath)
+    let _coinAvailableXPath = "/html/body/div[1]/div[1]/header/div/div[7]/b";
+    cy.xpath(_coinAvailableXPath)
       .invoke("text")
       .then((textBefore) => {
         cy.reload(true);
         cy.wait(2000);
-        cy.xpath(_coinAmountXPath)
+        cy.xpath(_coinAvailableXPath)
           .invoke("text")
           .should((textAfter) => {
             let _finalCoin: number =
@@ -73,18 +53,49 @@ describe("coin related tasks", () => {
             expect(parseInt(textAfter.replaceAll(",", ""))).to.eq(_finalCoin);
           });
       });
-    // .then(cy.log);
   });
 
-  it.skip("testing xpath", () => {
-    cy.logInAsAdmin();
-    cy.wait(2000);
-    cy.xpath("/html/body/div[1]/div[1]/header/div/div[7]/b")
-      .invoke("text")
-      .then(cy.log);
-    // .its("text")
-    // .then(($text) => {
-    //   console.log($text.get(0).innerText);
-    // });
+  context("transfer coin", () => {
+    beforeEach("add api listener", () => {
+      cy.logInAsAdmin();
+    });
+
+    it.only("from Transfer coin menu", () => {
+      cy.navigateTo("change-amount");
+      cy.clickAddNewButton();
+      cy.url().should("contain", "change-amount/new");
+
+      //receiver
+      cy.coinTransfer_selectAccount(1, "username1290");
+      //sender
+      cy.coinTransfer_selectAccount(2, "admin");
+
+      let _coinAvailableXPath = "/html/body/div[1]/div[1]/header/div/div[7]/b";
+      cy.xpath(_coinAvailableXPath)
+        .invoke("text")
+        .then((textBefore) => {
+          let _coinAmount = Math.floor(
+            parseInt(textBefore.replaceAll(",", "")) / 2
+          );
+          cy.coinTransfer_enterCoinNumberAndSubmit(1000, _coinAmount, true);
+
+          cy.logOutCmd();
+
+          cy.logInCmd("username1290", "321ewq;'");
+          cy.wait(1000);
+
+          cy.xpath(_coinAvailableXPath)
+            .invoke("text")
+            .should((textAfter) => {
+              expect(parseInt(textAfter.replaceAll(",", ""))).to.eq(
+                _coinAmount
+              );
+            });
+        });
+    });
+
+    it("from user menu", () => {});
   });
+
+  it("", () => {});
 });
